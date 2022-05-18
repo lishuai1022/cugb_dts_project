@@ -1,0 +1,18 @@
+dts.client.api
+	全局：
+	1、表格排序功能
+		#3.4.4 获取盈亏报表列表
+		#3.4.5 获取委托记录列表
+
+	2、私有券池/公共券池：
+		1、增加搜索功能
+		3、表格增加交易限制一列
+		4、资金账户交易限制为正常、锁买卖、禁开仓   没有停用
+
+	3、最大可买可买计算公式 
+------------dts.client.api 接口修改---------------------
+(r"/query/profit", handlers.query.ProfitHandler),#3.4.4 获取盈亏报表列表
+(r"/query/order", handlers.query.OrderHandler),#3.4.5 获取委托记录列表
+(r"/query/position", handlers.query.PositionHandler),3.4.1 获取交易底仓列表
+(r"/query/public/position", handlers.query.PublicPositionHandler),3.4.10 获取公共券池持仓列表
+(r"/stock/bscount", handlers.query.StockBscountHandler),3.5.2 获取单个股票的最大可买卖数量
