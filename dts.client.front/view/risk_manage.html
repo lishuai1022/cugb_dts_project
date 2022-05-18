@@ -1,0 +1,228 @@
+<div id="risk_manage" data-options="fit:true"  class="easyui-layout">
+    <div data-options="region:'center',border:false" style="border-right:1px solid #d4d4d4;">
+        <table id="risk_manage_table"  style="width: 100%;height:100%;"></table>
+        <div id="risk_manage_top_bar" class="clearfix" style="padding:5px;">
+            <div class="fr">
+                <input class="easyui-textbox keyword" data-options="prompt:'交易员名称'" type="text" style="width:120px">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-search" @click="search">搜索</a>
+            </div>
+        </div>
+    </div> 
+
+    <div data-options="region:'east',border:false" style="width:50%;border-left:5px solid transparent;">
+        <div class="easyui-panel" title="股票详情" style="width: 100%;height: 50%">
+            <div v-show="id" style="width: 100%;height: 100%">
+                <table class="stock_detail_table" style="width: 100%;height: 100%;"/>
+            </div>
+        </div>
+
+        <div class="easyui-panel" title="委托记录" style="width: 100%;height: 50%">
+            <div v-show="id" class="entrust_record_main" style="width: 100%;height: 100%;">
+                <table class="entrust_record_table" style="width: 100%;height: 100%;"/>
+                <div class="entrust_record_table_bar clearfix" style="padding:5px;width:100%;background: #fff">
+                    买入已成：<span class="buy_dealt_sum" style="padding-right: 15px">50000股</span>
+                    卖出已成：<span class="sell_dealt_sum" style="padding-right: 15px">0股</span>
+                    委托日期：<input class="easyui-datebox time_start" name="time_start"  style="width:105px;" prompt="开始时间">至
+                    <input class="easyui-datebox time_end" name="time_end"   style="width:105px;" prompt="截止时间">
+                    <a href="#" class="easyui-linkbutton" style="margin-left: 5px;margin-right: 10px" iconCls="icon-search" @click="searchEntrust">搜索</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<script type="text/javascript">
+    !function(){
+        new Vue({
+            el:'#risk_manage',
+            data:{
+                id:null,
+            },
+            mounted:function(){
+                this.initTableData();
+                // this.initTabs();
+            },
+            methods:{
+                initTableData:function(){
+                    var vm=this;
+                    var optionData ={
+                        url:'/api/rcontrol/trader/list',
+                        pagination: true,
+                        pageSize:30,
+                        border:false,
+                        method:'get',
+                        toolbar:'#risk_manage_top_bar',
+                        autoRowHeight:false,
+                        singleSelect:true,
+                        striped:true,
+                        fitColumns:false,
+                        scrollbarSize:0,
+                        frozenColumns:[[
+                            {field:'trader_name',width:100,align:'center',title:'交易员名称',sortable:true}
+                        ]],
+                        columns:[[
+                            {field:'tprofit',width:100,halign:'center',align:'right',title:'交易盈亏',sortable:true,formatter:API.METHODS.colorNumberFormatter,
+                                styler: function(value,row,index){
+                                    if ( row.dprofit_chk ==1 ){
+                                        return 'background-color:#f55d5d;';
+                                    }
+                                }
+                            },
+                            {field:'fprofit',width:100,halign:'center',align:'right',title:'浮动盈亏',sortable:true,formatter:API.METHODS.colorNumberFormatter},
+                            {field:'kamount_d',width:100,halign:'center',align:'right',title:'开仓金额(多)',sortable:true,formatter:API.METHODS.numberFormatter,
+                                styler: function(value,row,index){
+                                    if ( row.kamount_d_chk ==1  ){
+                                        return 'background-color:#f55d5d;color:black;';
+                                    }
+                                }
+                            },
+                            {field:'kamount_k',width:100,halign:'center',align:'right',title:'开仓金额(空)',sortable:true,formatter:API.METHODS.numberFormatter,
+                                styler: function(value,row,index){
+                                    if ( row.kamount_k_chk ==1  ){
+                                        return 'background-color:#f55d5d;color:black;';
+                                    }
+                                }
+                            },
+                            {field:'tamount_d',width:100,halign:'center',align:'right',title:'在途金额(多)',sortable:true,formatter:API.METHODS.numberFormatter,
+                                styler: function(value,row,index){
+                                    if ( row.tamount_d_chk ==1 ){
+                                        return 'background-color:#f55d5d;color:black;';
+                                    }
+                                }
+                            },
+                            {field:'tamount_k',width:100,halign:'center',align:'right',title:'在途金额(空)',sortable:true,formatter:API.METHODS.numberFormatter,
+                                styler: function(value,row,index){
+                                    if ( row.tamount_k_chk ==1 ){
+                                        return 'background-color:#f55d5d;color:black;';
+                                    }
+                                }
+                            },
+                            {field:'tcount',width:80,align:'center',title:'在途笔数',sortable:true}
+                        ]],
+                        onBeforeLoad:function(param){
+                            param.keyword = $('#risk_manage .keyword').val();
+                        },
+                        onClickRow:function (owIndex, rowData) {
+                            vm.id = rowData.trader_id;
+                            vm.$nextTick(function(){
+                                vm.getDetail();;
+                            })
+                        },
+                    };
+                    API.METHODS.loadData('#risk_manage_table',optionData);
+                },
+                search:function(){//搜索
+                    $('#risk_manage_table').datagrid('gotoPage', 1);
+                    this.id = null;
+                },
+                searchEntrust:function(){
+                    $('#risk_manage .entrust_record_table').datagrid('gotoPage', 1);
+                },
+                getDetail:function(){//获取右侧详情信息
+                    this.initDetailTable();
+                    $('#risk_manage .entrust_record_main').hide();
+                },
+                initDetailTable:function(){
+                    var vm=this;
+                    var optionData ={
+                        url:'/api/rcontrol/trader/detail',
+                        pagination: true,
+                        border:false,
+                        method:'get',
+                        singleSelect:true,
+                        autoRowHeight:false,
+                        striped:true,
+                        fitColumns:false,
+                        scrollbarSize:0,
+                        frozenColumns:[[
+                            {field:'scode',align:'center',title:'股票代码',sortable:true},
+                            {field:'sname',align:'center',title:'股票名称'}
+                        ]],
+                        columns:[[
+                            {field:'account_name',align:'center',title:'资金账户'},
+                            {field:'tprofit',halign:'center',align:'right',title:'交易盈亏',sortable:true,formatter:API.METHODS.colorNumberFormatter},
+                            {field:'fprofit',halign:'center',align:'right',title:'浮动盈亏',sortable:true,formatter:API.METHODS.colorNumberFormatter},
+                            {field:'count',align:'center',title:'头寸股数',sortable:true},
+                            {field:'price',align:'center',title:'头寸成本',sortable:true,formatter:API.METHODS.numberFormatter},
+                            {field:'kamount',halign:'center',align:'right',title:'开仓金额',sortable:true,formatter:API.METHODS.numberFormatter},
+                            {field:'tamount_d',halign:'center',align:'right',title:'在途金额(多)',sortable:true,formatter:API.METHODS.numberFormatter},
+                            {field:'tamount_k',halign:'center',align:'right',title:'在途金额(空)',sortable:true,formatter:API.METHODS.numberFormatter},
+                            {field:'tcount',align:'center',title:'在途笔数',sortable:true},
+                            {field:'uratio',align:'center',title:'利用率',sortable:true,formatter:API.METHODS.percentFormatter}
+                        ]],
+                        onBeforeLoad:function(p){
+                            p.trader_id = vm.id;
+                        },
+                        onClickRow:function (index,rowData) {
+                            $('#risk_manage .entrust_record_main').show();
+                            vm.initEntrustTable(rowData);
+                        }
+                    };
+                    API.METHODS.loadData('#risk_manage .stock_detail_table',optionData);
+                },
+                initEntrustTable:function(rowData){
+                    var vm=this;
+                    $('#risk_manage .time_start').datebox('setValue',vm.setDateRange('currentDay')[0]);
+                    $('#risk_manage .time_end').datebox('setValue',vm.setDateRange('currentDay')[0]);
+                    var optionData ={
+                        url:'/api/rcontrol/trader/order/list',
+                        pagination: true,
+                        border:false,
+                        toolbar:'#risk_manage .entrust_record_table_bar',
+                        method:'get',
+                        singleSelect:true,
+                        autoRowHeight:false,
+                        striped:true,
+                        fitColumns:false,
+                        scrollbarSize:0,
+                        frozenColumns:[[
+                            {field:'side',align:'center',title:'委托方向',sortable:true},
+                            {field:'status',align:'center',title:'状态',sortable:true}
+                        ]],
+                        columns:[[
+                            {field:'ocount',align:'center',title:'委托数量',sortable:true},
+                            {field:'oprice',align:'center',title:'委托价格',sortable:true},
+                            {field:'dcount',align:'center',title:'成交数量',sortable:true},
+                            {field:'dprice',align:'center',title:'成交价格',sortable:true},
+                            {field:'ocode',align:'center',title:'委托编号',sortable:true},
+                            {field:'otime',align:'center',title:'委托时间',sortable:true},
+                            {field:'dtime',align:'center',title:'成交时间',sortable:true},
+                        ]],
+                        onBeforeLoad:function(p){
+                            p.trader_id = rowData.trader_id;
+                            p.account_id = rowData.account_id;
+                            p.ccode = rowData.scode;
+                            p.status = $('#risk_manage .entrust_record_table_bar .status').val();
+                            p.time_start = $('#risk_manage .entrust_record_table_bar .time_start').val();
+                            p.time_end = $('#risk_manage .entrust_record_table_bar .time_end').val();
+                            p.time_type = 'otime';
+                        },
+                        loadFilter:function (data) {
+                            if (!data['islogin']){
+                                API.METHODS.removeUserInfo();
+                            }else {
+                                if(data.status=='0') {
+                                    var buy_dealt_sum = data['data']['buy_dealt_sum'];
+                                    var sell_dealt_sum = data['data']['sell_dealt_sum'];
+                                    $('#risk_manage .entrust_record_table_bar .buy_dealt_sum').text(buy_dealt_sum ? buy_dealt_sum+'股':'--');
+                                    $('#risk_manage .entrust_record_table_bar .sell_dealt_sum').text(sell_dealt_sum ? sell_dealt_sum+'股':'--');
+                                    if(optionData.pagination){
+                                        return {"rows": data['data']['list'], 'total': data.data.total,"isFilter":true};
+                                    }
+                                    return {"rows": data['data']['list'],"isFilter":true};
+
+                                }else{
+                                    return {"rows":[], 'total': 0,"isFilter":true};
+                                }
+                            }
+                        },
+                    };
+                    API.METHODS.loadData('#risk_manage .entrust_record_table',optionData);
+                }
+            }
+        })
+    }();
+
+</script>

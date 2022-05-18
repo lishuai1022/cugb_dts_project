@@ -1,0 +1,71 @@
+<div id="stock_distribution" data-options="fit:true" class="easyui-layout">
+    <div data-options="region:'center',border:false" style="border-right:1px solid #d4d4d4;">
+        <table class="operation_table"  style="width: 100%;height:100%;"></table>
+        <div id="stock_distribution_bar" class="clearfix" style="padding:5px;">
+            <div class="fr">
+                资金账户：<input class="easyui-combobox accountSelect" style="width: 120px">
+                交易员名称：<input class="easyui-combobox traderSelect" style="width: 120px">
+                <input class="easyui-textbox keyword" data-options="prompt:'股票代码/名称'" type="text" style="width:130px">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-search" @click="search">搜索</a>
+                <a href="#" class="easyui-linkbutton" @click="getExcel">导出</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    !function(){
+        new Vue({
+            el:'#stock_distribution',
+            data:{
+            },
+            mounted:function(){
+                this.initAccount_TraderSelector({el:'#stock_distribution .accountSelect'},{el:'#stock_distribution .traderSelect'});
+                this.initTableData();
+            },
+            methods:{
+                initTableData:function(){
+                    var vm=this;
+                    var optionData ={
+                        url:'/api/stock/allocation/list',
+                        pagination: true,
+                        pageSize:30,
+                        border:false,
+                        method:'get',
+                        toolbar:'#stock_distribution_bar',
+                        autoRowHeight:false,
+                        singleSelect:true,
+                        striped:true,
+                        fitColumns:true,
+                        scrollbarSize:0,
+                        columns:[[
+                            {field:'trader_name',width:120,align:'center',title:'交易员名称',sortable:true},
+                            {field:'account_name',width:120,align:'center',title:'资金账户',sortable:true},
+                            {field:'ccode',width:100,align:'center',title:'股票代码',sortable:true},
+                            {field:'cname',width:100,align:'center',title:'股票名称',sortable:true},
+                            {field:'acount',width:100,align:'center',title:'已分配数',sortable:true},
+                            {field:'amvalue',width:100,align:'right',halign:'center',title:'已分市值',sortable:true,formatter:API.METHODS.numberFormatter},
+                            {field:'hcount',width:100,align:'center',title:'持仓数量',sortable:true},
+                            {field:'ucount',width:100,align:'center',title:'可卖数量',sortable:true},
+                            {field:'delist',width:90,align:'center',title:'停牌标识',sortable:true}
+                        ]],
+                        onBeforeLoad:function (param) {
+                            param.account_id = $('#stock_distribution_bar .accountSelect').val();
+                            param.trader_id = $('#stock_distribution_bar .traderSelect').val();
+                            param.keyword = $('#stock_distribution_bar .keyword').val();
+                            param.excess = '';
+                        }
+                    };
+                    API.METHODS.loadData('#stock_distribution .operation_table',optionData);
+                },
+                search:function(){//搜索
+                    $('#stock_distribution .operation_table').datagrid('gotoPage', 1);
+                },
+                getExcel:function(){
+                    this.exportExcel('#stock_distribution .operation_table');
+                },
+            }
+        })
+    }();
+
+</script>

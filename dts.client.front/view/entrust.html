@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>未成委托</title>
+    <script type="text/javascript" src="/resources/js/super.js"></script>
+</head>
+
+<body>
+    <div id="entrust" style="height:100%;width:100%;">
+        <div class="title-bar"></div>
+        <!--<div style="padding: 0px 10px 10px 10px;width: 100%;height: 100%">-->
+        <!---->
+        <!--</div>-->
+        <table id="entrust_record_table" fitColumns="true" fit="true"></table>
+        <div id="entrust_record-toolbar" class="clearfix color-bg" style="padding:8px 5px;text-align:right;">
+            <div class="fr">
+                <span class="btn-border" onclick="Entrust.showWithdrawDialog(true)">全撤</>
+        </div>
+    </div>
+</div>
+
+<div id="win_entrust_withdraw" class="easyui-window color-bg" title="撤单确认" style="width:300px;"
+     data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+	 minimizable:false,maximizable:false,closed:true">
+    <p style="text-align: center;padding: 0 10px">确定要撤回所有委托吗？</p>
+    <div class="dialog_footer">
+        <a class="btn-border btn-no" style="width:90px">取消</a>
+        <a class="btn-red btn-ok" style="width:90px;margin-left: 20px" >确定</a>
+    </div>
+</div>
+
+<div id="win_entrust_withdraw_hint" class="easyui-window" title="部分撤单失败提示" style="width:300px;"
+     data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+	 minimizable:false,maximizable:false,closed:true">
+    <p style="text-align: center;padding: 0 10px"></p>
+    <div class="dialog_footer">
+        <a class="btn-red btn-no" data-options="iconCls:'icon-ok'" style="width:90px;margin-left: 20px" >确定</a>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    var Entrust = {
+        context:this,
+        init:function(){
+            this.initTableData();
+            this.startTimer();
+        },
+        initTableData:function (){
+            var optionData = {
+                url: '/api/query/dorder',
+                pagination: false,
+                pageSize:30,
+                scrollbarSize:0,
+                border:false,
+                method:'get',
+                loadMsg:'',
+                toolbar:'#entrust_record-toolbar',
+                autoRowHeight:false,
+                singleSelect:true,
+                striped:true,
+                fitColumns:true,
+                remoteSort: false,
+                scrollbarSize:0,
+                columns:[[
+                    {field:'ccode',width:80,align:'center',title:'股票代码',sortable:true},
+                    {field:'cname',width:80,align:'center',title:'股票名称',sortable:true},
+                    {field:'fname',width:80,align:'center',title:'资金账户',sortable:true},
+                    {field:'source',width:80,align:'center',title:'股票来源',sortable:true, formatter:function (val) {
+                            return val==0 ? '私有券池':'公共券池'
+                        },
+                    },
+                    {field:'side',width:80,align:'center',title:'委托方向',sortable:true,formatter:function (val) {
+                            return val==0 ? '买入':'卖出'
+                        },
+                        styler:function (val) {
+                            return val==0 ?'color:#FF4C4C':'color:#29A63D'
+                        }},
+                    {field:'status',width:80,align:'center',title:'委托状态',sortable:true,formatter:function (val) {
+                            return Entrust.getStatusText(val)
+                        }},
+                    {field:'otype',width:80,align:'center',title:'买卖方式',sortable:true,formatter:function (val) {
+                        switch(val) {
+                            case 'ptmr':
+                                return '普通买入';
+                                break;
+                            case 'ptmc':
+                                return '普通卖出';
+                                break;
+                            case 'rzmr':
+                                return '融资买入';
+                                break;
+                            case 'mqhk':
+                                return '卖券还款';
+                                break;
+                            default:
+                                return '--'
+                                break;
+                        }
+                    }},
+                    {field:'oprice',width:80,align:'center',title:'委托价格',sortable:true,
+                        sorter: function(a, b) {
+                            return parseFloat(a) - parseFloat(b);
+                        }},
+                    {field:'ocount',width:80,align:'center',title:'委托数量',sortable:true},
+                    {field:'dcount',width:80,align:'center',title:'成交数量',sortable:true,},
+                    {field:'ocode',width:80,halign:'center',align:'center',title:'委托编号',sortable:true, 
+                        sorter: function(a, b) {
+                            return parseFloat(a) - parseFloat(b);
+                        }
+                    },
+                    {field:'otime',width:80,align:'center',title:'委托时间',sortable:true,
+                        sorter: function(a, b) {
+                            return parseFloat(a) - parseFloat(b);
+                        },
+                        formatter:function (val) {
+                            return EUtils.formatDate(new Date(val))
+                        }},
+                ]],
+                onBeforeLoad(p){
+                    p['item'] = 'new_can_cancel'
+                },
+                onDblClickRow(index,rowData){
+                    if(!(rowData['status']=='tocancel'||rowData['status']=='canceling')){
+                        Entrust.showWithdrawDialog(false,rowData);
+                    }
+                },
+                onLoadSuccess:function () {
+                    // var width = $('#entrust').outerWidth();
+                    // var height = $('#entrust').outerHeight();
+                    // console.log(width);
+                    // window.resizeTo(width, height);//改变大小
+                }
+            }
+            API.METHODS.loadData('#entrust_record_table',optionData);
+        },
+        showWithdrawDialog:function (isAll,rowData) {//isAll=是否全部撤单
+            var settings = STORAGE.getItem('settings'),
+                settings = settings ? JSON.parse(settings) : {};
+            let  isShow = settings.showRetreatDialog;
+            if(isShow==''||isShow!='no'){//获取全局配置 是否弹出确认框
+                if(isAll){
+                    if(!Entrust.isOrder())return;
+                    $('#win_entrust_withdraw p').text('确定要撤回所有委托吗？');
+                }else{
+                    $('#win_entrust_withdraw p').text(`确定撤回${rowData.ccode+'/'+rowData.cname+'，'+rowData.fname}资金账户的委托吗？`);
+                }
+                EUtils.openWindow('#win_entrust_withdraw',function () {
+                    EUtils.closeWindow('#win_entrust_withdraw');
+                    Entrust.withdraw(isAll,rowData);
+                })
+            }else{
+                if(!Entrust.isOrder())return;
+                Entrust.withdraw(isAll,rowData);
+            }
+
+        },
+        isOrder(){
+            var eList = $('#entrust_record_table').datagrid('getRows');
+            var ncLength = 0;
+            for (var item of eList) {
+                if(item['status']=='tocancel'||item['status']=='canceling'){
+                   ++ncLength
+                }
+            }
+            if(eList.length==0 || eList.length == ncLength){
+                EUtils.toast('暂无可撤委托');
+                EUtils.closeWindow('#win_entrust_withdraw');
+                return false
+            }
+            return true;
+        },
+        withdraw:function (isAll,rowData) {
+            $.messager.progress();
+            var orderIds = [];
+            var orderData = {};
+            if(isAll){
+                var eList = $('#entrust_record_table').datagrid('getRows');
+                for (var item of eList) {
+                    if(!(item['status']=='tocancel'||item['status']=='canceling')){
+                        orderIds.push(item.order_id);
+                        orderData[item.order_id] = item;
+                    }
+                }
+            }else{
+                orderIds.push(rowData.order_id);
+                orderData[rowData.order_id] = rowData;
+            }
+            var url='/api/stock/cancel'
+            API.METHODS.getData(url,{order_id:orderIds.toString()},function (res) {
+                $.messager.progress('close');
+                if(res.status==0){
+                    var successOrderIdStr = res['data']['order_id'];
+                    if(successOrderIdStr){
+                        var successOrderIdList = successOrderIdStr.split(',');
+                        for (var sOrderId of successOrderIdList) {
+                            delete orderData[sOrderId];//删除成功的订单
+                        }
+                        if(Object.keys(orderData).length>0){//如果大于0 说明有失败的订单
+                            var errorHit=''
+                            for (var key in orderData){
+                                var orderItem = orderData[key];
+                                errorHit+='('+orderItem['ccode']+'/'+orderItem['cname']+')，'
+                            }
+                            $('#win_entrust_withdraw_hint p').text(errorHit+'撤单失败！');
+                            EUtils.openWindow('#win_entrust_withdraw_hint')
+                        }
+                    }
+                    $('#entrust_record_table').datagrid('reload');
+                    EUtils.toast(res['msg']);
+                }else{
+                    EUtils.toast(res['msg']);
+                }
+            },'post')
+        },
+        getStatusText(status){
+            switch (status) {
+                case 'unsend':return '未报';
+                case 'tosend':return '待报';
+                case 'tocancel':return '待撤';
+                case 'sent':return '已报';
+                case 'sending':return '正报';
+                case 'canceling':return '正撤';
+                case 'canceled':return '已撤';
+                case 'pcanceled':return '部撤';
+                case 'dealt':return '已成';
+                case 'pdealt':return '部成';
+                case 'cexpired':return '撤废';
+                case 'expired':return '废单';
+                case 'pexpired':return '部废';
+                default: return '--';
+            }
+        },
+        startTimer:function () {
+            setInterval(function () {
+                $('#entrust_record_table').datagrid('reload')
+            },3000)
+        }
+    }
+    Entrust.init();
+</script>
+</html>

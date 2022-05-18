@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>私有券池</title>
+    <link rel="shortcut icon" href="logo.ico" type="image/x-icon" />
+    <style>
+        .label {
+            color: #9492b0;
+            padding-left: 10px;
+        }
+        
+        .textbox.combo {
+            height: 23px;
+            top: -1px;
+        }
+        
+        .code_search_input.position_keyword {
+            height: 23px;
+            line-height: 23px;
+        }
+        
+        .text-red {
+            color: #FF4C4C
+        }
+        
+        .text-green {
+            color: #29a63d
+        }
+        /* #position .datagrid-cell-c1-float_profit {
+            padding-right: 30px !important;
+        } */
+    </style>
+    <link rel="stylesheet" type="text/css" href="/resources/css/dts_code_search.css">
+    <script src="/resources/js/super.js"></script>
+</head>
+
+<body>
+    <div id="position" style="height:100%;width:100%;">
+        <div class="title-bar"></div>
+        <div id="index_position-toolbar" class="color-bg clearfix" style="padding:5px 5px;text-align:right; min-width: 600px;">
+            <div class="fl" style="line-height: 24px;">交易盈亏:
+                <span id="deal-profits">--</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 浮动盈亏:
+                <span id="float-profits">--</span>
+            </div>
+            <div class="fr">
+                <span class="label">交易限制&nbsp;</span><input class="statusSelect" style="width:90px;height:24px;top:-1px" />
+                <input type="text" class="code_search_input position_keyword" style="width:125px;height:24px;margin-left:5px" placeholder="股票简拼/代码/名称">
+                <a class="btn-red btn-ok btn_search" data-options="iconCls:'icon-ok'" style="width:90px;margin:0 5px">搜索</a>
+                <a class="btn-border btn-no table_no_reload" data-options="iconCls:'icon-cancel'" style="width:90px">重置</a>
+            </div>
+        </div>
+        <table id="index_position_table" fitColumns="true" fit="true"></table>
+    </div>
+    <script type="text/javascript">
+        var windowManage = window.opener ? window.opener.window.windowManage : window.top.window.windowManage;
+        var opener = window.opener ? window.opener.window : window.top.window;
+        var Index = {
+            context: this,
+            init: function() {
+                this.getSource();
+                this.bindEvents();
+                this.initTableData();
+                this.startTimer();
+                EUtils.remoteCodeSearch('#position .position_keyword');
+            },
+            bindEvents: function() {
+                var that = this;
+                $('#position .btn_search').on('click', function() {
+                    that.search();
+                })
+
+                $(document).on('click', '#position .table_no_reload', function(e) {
+                    $('#position .position_keyword').val('');
+                    setTimeout(function() {
+                        that.getSource();
+                        that.search();
+                    }, 100);
+                });
+            },
+            initTableData: function() {
+                var that = this;
+                var queryParams = that.getQueryParam();
+                var optionData = {
+                    url: '/api/query/position',
+                    queryParams: queryParams,
+                    pagination: false,
+                    pageSize: 30,
+                    scrollbarSize: 0,
+                    border: false,
+                    method: 'get',
+                    loadMsg: '',
+                    remoteSort: false,
+                    toolbar: '#index_position-toolbar',
+                    autoRowHeight: false,
+                    singleSelect: true,
+                    onLoadSuccess: compute,
+                    striped: true,
+                    fitColumns: true,
+                    scrollbarSize: 0,
+                    rowStyler: function(index, row) {
+                        if (row.status == 'bslimit') {
+                            return 'background-color:#626262;color:#a4a4a4'
+                        }
+                    },
+                    columns: [
+                        [{
+                            field: 'ccode',
+                            width: 60,
+                            align: 'center',
+                            title: '股票代码',
+                            sortable: true,
+                        }, {
+                            field: 'cname',
+                            width: 60,
+                            align: 'center',
+                            title: '股票名称',
+                            sortable: true,
+                        }, {
+                            field: 'fname',
+                            width: 60,
+                            align: 'center',
+                            title: '资金账户',
+                            sortable: true,
+                        }, {
+                            field: 'status',
+                            width: 60,
+                            align: 'center',
+                            title: '交易限制',
+                            sortable: true,
+                            formatter: function(v, row, index) {
+                                switch (v) {
+                                    case 'normal':
+                                        return '正常';
+                                        break;
+                                    case 'bslimit':
+                                        return '锁买卖';
+                                        break;
+                                    case 'olimit':
+                                        return '禁开仓';
+                                        break;
+                                }
+                            }
+                        }, {
+                            field: 'balance',
+                            width: 60,
+                            align: 'right',
+                            halign: 'right',
+                            title: '可用金额',
+                            sortable: true,
+                            sorter: function(a, b) {
+                                return parseFloat(a) - parseFloat(b);
+                            },
+                            formatter: API.METHODS.numberFormatter
+                        }, {
+                            field: 'acount',
+                            width: 60,
+                            align: 'center',
+                            title: '分配数量',
+                            sortable: true
+                        }, {
+                            field: 'hcount',
+                            width: 60,
+                            halign: 'center',
+                            align: 'center',
+                            title: '持仓数量',
+                            sortable: true
+                        }, {
+                            field: 'bcount',
+                            width: 60,
+                            halign: 'center',
+                            align: 'center',
+                            title: '已买数量',
+                            sortable: true,
+                        }, {
+                            field: 'scount',
+                            width: 60,
+                            halign: 'center',
+                            align: 'center',
+                            title: '已卖数量',
+                            sortable: true
+                        }, {
+                            field: 'cash_count',
+                            width: 60,
+                            align: 'center',
+                            title: '头寸股数',
+                            fixed: true,
+                            sortable: true,
+                            styler: function(value, row, index) {
+                                if (parseFloat(value) > 0) {
+                                    return 'color:#FF4C4C;';
+                                } else if (parseFloat(value) < 0) {
+                                    return 'color:#29A63D;';
+                                }
+                            },
+                        }, {
+                            field: 'cash_price',
+                            width: 60,
+                            align: 'center',
+                            title: '头寸成本',
+                            sortable: true,
+                            sorter: function(a, b) {
+                                return parseFloat(a) - parseFloat(b);
+                            },
+                            formatter: function(v) {
+                                if (isNaN(parseFloat(v))) {
+                                    return '--'
+                                } else {
+                                    return parseFloat(v).toFixed(4);
+                                }
+                            }
+                        }, {
+                            field: 'buy_onroad_money',
+                            width: 60,
+                            halign: 'right',
+                            align: 'right',
+                            title: '在途金额(多)',
+                            sortable: true,
+                            sorter: function(a, b) {
+                                return parseFloat(a) - parseFloat(b);
+                            },
+                            formatter: API.METHODS.numberFormatter
+                        }, {
+                            field: 'sell_onroad_money',
+                            width: 60,
+                            halign: 'right',
+                            align: 'right',
+                            title: '在途金额(空)',
+                            sortable: true,
+                            sorter: function(a, b) {
+                                return parseFloat(a) - parseFloat(b);
+                            },
+                            formatter: API.METHODS.numberFormatter
+                        }, {
+                            field: 'deal_profit',
+                            width: 60,
+                            halign: 'right',
+                            align: 'right',
+                            title: '交易盈亏',
+                            sortable: true,
+                            sorter: function(a, b) {
+                                return parseFloat(a) - parseFloat(b);
+                            },
+                            styler: function(value, row, index) {
+                                if (value > 0) {
+                                    return 'color:#FF4C4C;';
+                                } else if (value < 0) {
+                                    return 'color:#29A63D;';
+                                }
+                            },
+                            formatter: API.METHODS.numberFormatter
+                        }, {
+                            field: 'float_profit',
+                            width: 60,
+                            halign: 'right',
+                            align: 'right',
+                            title: '浮动盈亏',
+                            sortable: true,
+                            sorter: function(a, b) {
+                                return parseFloat(a) - parseFloat(b);
+                            },
+                            styler: function(value, row, index) {
+                                if (value > 0) {
+                                    return 'color:#FF4C4C;';
+                                } else if (value < 0) {
+                                    return 'color:#29A63D;';
+                                }
+                            },
+                            formatter: API.METHODS.numberFormatter
+                        }]
+                    ],
+                    onBeforeLoad(p) {
+                        p['can_cancel'] = '';
+                        p['_v'] = 2;
+                    },
+                    onClickRow(index, rowData) {
+                        var height = window.screen.availHeight;
+                        var width = window.screen.availWidth;
+                        var userAgent = navigator.userAgent.toLowerCase();
+                        var openWidth = userAgent.indexOf('electron/') > -1 ? 250 : 250;
+                        var openHeight = userAgent.indexOf('electron/') > -1 ? 315 : 315;
+
+                        if (windowManage[rowData.ccode + '-' + rowData.faccount_id + '-0']) {
+                            windowManage[rowData.ccode + '-' + rowData.faccount_id + '-0'].close();
+                            delete windowManage[rowData.ccode + '-' + rowData.faccount_id + '-0'];
+                            setTimeout(function() {
+                                windowManage[rowData.ccode + '-' + rowData.faccount_id + '-0'] = window.open('/view/trade.html?v=' + (+new Date()) + '&ccode=' + rowData.ccode + '&cash_count=' + rowData.cash_count + '&cname=' + rowData.cname + '&faccount_id=' + rowData.faccount_id + '&source=0' + '&fname=' + rowData.fname, rowData.ccode + '-' + rowData.faccount_id + '-0', `left=${(width-openWidth)/2},top=${(height-openHeight)/2},width=${openWidth},height=${openHeight}`);
+                            }, 200);
+                        } else {
+                            windowManage[rowData.ccode + '-' + rowData.faccount_id + '-0'] = window.open('/view/trade.html?v=' + (+new Date()) + '&ccode=' + rowData.ccode + '&cname=' + rowData.cname + '&faccount_id=' + rowData.faccount_id + '&source=0' + '&fname=' + rowData.fname, rowData.ccode + '-' + rowData.faccount_id + '-0', `left=${(width-openWidth)/2},top=${(height-openHeight)/2},width=${openWidth},height=${openHeight}`);
+                        }
+                    },
+                }
+                API.METHODS.loadData('#index_position_table', optionData);
+            },
+            getSource: function() {
+                var data = [{
+                    'id': 'normal',
+                    'name': '正常'
+                }, {
+                    'id': 'bslimit',
+                    'name': '锁买卖'
+                }, {
+                    'id': 'olimit',
+                    'name': '禁开仓'
+                }];
+                EUtils.initSelect('#position .statusSelect', data, {
+                    multiple: true,
+                    editable: false,
+                    firstData: {
+                        'id': '',
+                        'name': '全部'
+                    }
+                });
+            },
+            search() {
+                this.getQueryParam();
+                $('#index_position_table').datagrid('load');
+            },
+            getQueryParam: function() {
+                var queryParams = {};
+                try {
+                    queryParams = $('#index_position_table').datagrid('options').queryParams;
+                } catch (e) {
+                    console.log(e);
+                } finally {}
+                queryParams.status = $('#position .statusSelect').combobox('getValues').join(',');
+                queryParams._v = 2;
+                queryParams.word = $('#position .position_keyword').val().replace(/\D+/g, '');
+
+                return queryParams;
+            },
+            showWithdrawDialog: function() {
+                if (STORAGE.getItem('showRetreatDialog')) {
+                    EUtils.openWindow('#win_entrust_withdraw', function() {
+                        this.withdraw();
+                    })
+                } else {
+                    this.withdraw();
+                }
+
+            },
+            withdraw: function() {
+                let url = '/api/stock/cancel'
+                API.METHODS.getData(url, {}, function(res) {
+                    if (res.status == 0) {
+                        EUtils.toast(res['msg'])
+                    } else {
+
+                    }
+                }, 'post')
+            },
+            getStatusText(status) {
+                switch (status) {
+                    case 'unsend':
+                        return '未报';
+                    case 'tosend':
+                        return '待报';
+                    case 'tocancel':
+                        return '待撤';
+                    case 'sent':
+                        return '已报';
+                    case 'sending':
+                        return '正报';
+                    case 'canceling':
+                        return '正撤';
+                    case 'canceled':
+                        return '已撤';
+                    case 'pcanceled':
+                        return '部撤';
+                    case 'dealt':
+                        return '已成';
+                    case 'pdealt':
+                        return '部成';
+                    case 'cexpired':
+                        return '撤废';
+                    case 'expired':
+                        return '废单';
+                    case 'pexpired':
+                        return '部废';
+                    default:
+                        return '--';
+                }
+            },
+            startTimer: function() {
+                setInterval(function() {
+                    $('#index_position_table').datagrid('reload');
+                    compute();
+                }, 3000)
+            }
+        }
+        Index.init();
+
+        function compute() {
+            var rows = $('#index_position_table').datagrid('getRows') //获取当前的数据行
+            var deal_profits = 0, // 计算交易盈亏的总和
+                float_profits = 0; // 统计浮动盈亏的总和
+            for (var i = 0; i < rows.length; i++) {
+                deal_profits += parseFloat(rows[i]['deal_profit']);
+                float_profits += parseFloat(rows[i]['float_profit']);　　　　
+            }
+            deal_profits = parseFloat(deal_profits.toFixed(2)) == 0 ? 0 : deal_profits.toFixed(2);
+            float_profits = parseFloat(float_profits.toFixed(2)) == 0 ? 0 : float_profits.toFixed(2);
+            $('#deal-profits').text(deal_profits);
+            if (parseFloat(deal_profits) > 0) {
+                $('#deal-profits').removeClass().addClass('text-red')
+            } else if (parseFloat(deal_profits) < 0) {
+                $('#deal-profits').removeClass().addClass('text-green')
+            } else {
+                $('#deal-profits').removeClass()
+            }
+            $('#float-profits').text(float_profits);
+
+            if (parseFloat(float_profits) > 0) {
+                $('#float-profits').removeClass().addClass('text-red');
+            } else if (parseFloat(float_profits) < 0) {
+                $('#float-profits').removeClass().addClass('text-green')
+            } else {
+                $('#float-profits').removeClass()
+            }
+        }
+    </script>
+</body>
+
+</html>

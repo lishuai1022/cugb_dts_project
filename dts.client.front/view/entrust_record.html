@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>委托记录</title>
+    <link rel="shortcut icon" href="logo.ico" type="image/x-icon" />
+    <script src="/resources/js/super.js"></script>
+    <link rel="stylesheet" type="text/css" href="/resources/css/dts_code_search.css">
+    <style>
+        .label {
+            color: #9492b0;
+            padding-left: 10px;
+            font-size: 12px;
+        }
+        
+        .pagination-info {
+            margin-right: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="height:100%;width:100%;" id="data_order">
+        <div class="title-bar"></div>
+        <div id="data_order-toolbar" class="color-bg" style="padding:4px 5px;text-align:right;font-size: 12px;">
+            <div class="">
+                <div class="flow_box p2">
+                    <div class="flow_box p3 label">资金账户&nbsp;</div>
+                    <input class="accountSelect" style="width:90px;height:24px;" />
+                </div>
+                <div class="flow_box p2">
+                    <div class="flow_box p3 label">股票来源&nbsp;</div>
+                    <input class="sourceSelect" style="width:90px;height:24px;" />
+                </div>
+                <div class="flow_box p2">
+                    <div class="flow_box p3 label">委托方向&nbsp;</div>
+                    <input class="directionSelect" style="width:90px;height:24px;" />
+                </div>
+                <div class="flow_box p2">
+                    <input class="easyui-datebox startTime" name="startTime" style="width:110px;height:24px;" prompt="开始时间"> -
+                    <input class="easyui-datebox endTime" name="endTime" style="width:110px;height:24px;" prompt="截止时间">
+                </div>
+                <div class="flow_box p2">
+                    <!-- <div class="flow_box p3 label">股票代码&nbsp;</div> -->
+                    <input type="text" class="code_search_input data_order_keyword" style="width:125px;height:24px;" placeholder="股票简拼/代码/名称">
+                </div>
+                <div class="flow_box p2">
+                    <a class="btn-red btn-ok btn_search" data-options="iconCls:'icon-ok'" style="width:90px;margin:0 10px">搜索</a>
+                    <a class="btn-border btn-no table_reset table_no_reload">重置</a>
+                </div>
+            </div>
+        </div>
+        <table id="data_order_table" fitColumns="true" fit="true"></table>
+        <a class="btn-border btn-no btn_excel" style="position: absolute;bottom:6px;right:10px;font-size:12px;height:24px;line-height: 20px;border-color:rgb(170,172,187);" data-options="iconCls:'icon-cancel'" style="width:90px">导出</a>
+
+
+        <div class="easyui-window order_cost_detail" title="费用明细" data-options="" style="width:300px;padding-bottom:0px;display: none;" minimizable="false" maximizable="false" collapsible="false" closed="true" inline="true" modal="true" shadow="false">
+            <table class="order_cost_detail_table" style="width:100%;"></table>
+            <div class="dialog_footer">
+                <a class="btn-red btn-ok btn_sure" data-options="iconCls:'icon-ok'" style="width:90px;">确定</a>
+            </div>
+        </div>
+
+
+        <div id="win_msg" class="easyui-window" title="费用明细" style="width:300px;display: none;" data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+        minimizable:false,maximizable:false,closed:true">
+            <p style="text-align: center;padding:0;">无数据</p>
+            <div class="dialog_footer">
+                <a class="btn-red btn-ok" data-options="iconCls:'icon-ok'" style="width:90px;">确定</a>
+            </div>
+        </div>
+
+        <div id="win_format_msg" class="easyui-window" title="费用明细" style="width:300px;display: none;" data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+        minimizable:false,maximizable:false,closed:true">
+            <p style="text-align: center;padding:0;">数据格式错误</p>
+            <div class="dialog_footer">
+                <a class="btn-red btn-ok" data-options="iconCls:'icon-ok'" style="width:90px;">确定</a>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        ! function() {
+            var model = {};
+            var view = {};
+            var controller = {
+                view: null,
+                model: null,
+                init: function(view, model) {
+                    this.view = view;
+                    this.model = model;
+                    this.bindEvents();
+                    $('#data_order .startTime').val(API.METHODS.formatCurrentDate());
+                    $('#data_order .endTime').val(API.METHODS.formatCurrentDate());
+                    this.getAccountListOption();
+                    this.getDirection();
+                    this.getSource();
+                    EUtils.remoteCodeSearch('#data_order .data_order_keyword');
+                    this.initTableData();
+                },
+                bindEvents: function() {
+                    var that = this;
+                    EUtils.tableEventEntrust({
+                        el: '#data_order_table',
+                        entrustEl: '#data_order .data_order_detail',
+                        callBack: function(target, row) {
+                            that.openDetail(row);
+                        }
+                    })
+
+                    $('#data_order .btn_search').on('click', function() {
+                        that.search();
+                    })
+                    $('#data_order .btn_excel').on('click', function() {
+                        that.getExcel();
+                    });
+
+                    $(document).on('click', '#data_order .table_no_reload', function(e) {
+                        $('#data_order .startTime').val(API.METHODS.formatCurrentDate());
+                        $('#data_order .endTime').val(API.METHODS.formatCurrentDate());
+                        $('#data_order .data_order_keyword').val('');
+                        setTimeout(function() {
+                            that.search();
+                        }, 100);
+                    });
+                },
+                initTableData: function(opt) {
+                    var that = this;
+                    var optionData = {
+                        url: '/api/query/order',
+                        queryParams: {},
+                        pagination: true,
+                        pageSize: 30,
+                        scrollbarSize: 0,
+                        border: false,
+                        method: 'get',
+                        toolbar: '#data_order-toolbar',
+                        autoRowHeight: false,
+                        singleSelect: true,
+                        striped: true,
+                        fitColumns: true,
+                        scrollbarSize: 0,
+                        frozenColumns: [
+                            [{
+                                field: 'ccode',
+                                width: 100,
+                                align: 'center',
+                                title: '股票代码',
+                                sortable: true,
+                            }, {
+                                field: 'cname',
+                                width: 100,
+                                align: 'center',
+                                title: '股票名称',
+                                fixed: true,
+                                sortable: true,
+                            }, {
+                                field: 'fname',
+                                width: 100,
+                                align: 'center',
+                                title: '资金账户',
+                                sortable: true,
+                            }]
+                        ],
+                        columns: [
+                            [{
+                                    field: 'source',
+                                    width: 100,
+                                    align: 'center',
+                                    title: '股票来源',
+                                    sortable: true,
+                                    fixed: true,
+                                    formatter: function(val) {
+                                        return val == 0 ? '私有券池' : '公共券池'
+                                    },
+                                }, {
+                                    field: 'ocode',
+                                    width: 140,
+                                    align: 'center',
+                                    title: '委托编号',
+                                    sortable: true,
+                                    fixed: true
+                                }, {
+                                    field: 'side',
+                                    width: 100,
+                                    align: 'center',
+                                    title: '委托方向',
+                                    sortable: true,
+                                    fixed: true,
+                                    styler: function(value, row, index) {
+                                        if (value == '买入') {
+                                            return 'color:#FF4C4C;';
+                                        } else {
+                                            return 'color:#29A63D;';
+                                        }
+                                    }
+                                }, {
+                                    field: 'status',
+                                    width: 100,
+                                    align: 'center',
+                                    title: '状态',
+                                    fixed: true,
+                                    sortable: true
+                                }, {
+                                    field: 'otype',
+                                    width: 100,
+                                    align: 'center',
+                                    title: '买卖方式',
+                                    sortable: true,
+                                    fixed: true,
+                                    formatter: function(val) {
+                                        switch (val) {
+                                            case 'ptmr':
+                                                return '普通买入';
+                                                break;
+                                            case 'ptmc':
+                                                return '普通卖出';
+                                                break;
+                                            case 'rzmr':
+                                                return '融资买入';
+                                                break;
+                                            case 'mqhk':
+                                                return '卖券还款';
+                                                break;
+                                            default:
+                                                return '--'
+                                                break;
+                                        }
+                                    }
+                                }, {
+                                    field: 'oprice',
+                                    width: 100,
+                                    align: 'center',
+                                    title: '委托价格',
+                                    fixed: true,
+                                    sortable: true
+                                }, {
+                                    field: 'ocount',
+                                    width: 100,
+                                    align: 'center',
+                                    title: '委托数量',
+                                    fixed: true,
+                                    sortable: true
+                                }, {
+                                    field: 'dprice',
+                                    width: 100,
+                                    align: 'center',
+                                    title: '成交价格',
+                                    fixed: true,
+                                    sortable: true,
+                                    formatter: function(val) {
+                                        return API.METHODS.numberFormatter(val, {}, {}, 4);
+                                    }
+                                }, {
+                                    field: 'dcount',
+                                    width: 100,
+                                    align: 'center',
+                                    title: '成交数量',
+                                    fixed: true,
+                                    sortable: true
+                                }, {
+                                    field: 'dmoney',
+                                    width: 100,
+                                    halign: 'center',
+                                    align: 'right',
+                                    title: '成交金额',
+                                    fixed: true,
+                                    sortable: true,
+                                    formatter: API.METHODS.numberFormatter
+                                }, {
+                                    field: 'cost',
+                                    width: 100,
+                                    halign: 'center',
+                                    align: 'right',
+                                    title: '交易费用',
+                                    fixed: true,
+                                    sortable: true,
+                                    formatter: function(val, row, index) {
+                                        if (val - 0 === 0) {
+                                            return "0.00"
+                                        } else {
+                                            var res = API.METHODS.numberFormatter(val, row, index);
+                                            return '<a href="javascript:;" style="color:#4C94FF" class="easyui-linkbutton data_order_detail" data-index="' + index + '">' + res + '</a>';
+                                        }
+
+                                    }
+                                }, {
+                                    field: 'amount',
+                                    width: 100,
+                                    halign: 'center',
+                                    align: 'right',
+                                    title: '发生金额',
+                                    fixed: true,
+                                    sortable: true,
+                                    formatter: API.METHODS.numberFormatter
+                                },
+
+                                {
+                                    field: 'otime',
+                                    width: 140,
+                                    align: 'center',
+                                    title: '委托时间',
+                                    fixed: true,
+                                    sortable: true,
+                                    formatter: function(val, row, index) {
+                                        return row.odate + " " + row.otime;
+                                    }
+                                },
+
+                                {
+                                    field: 'dtime',
+                                    width: 140,
+                                    align: 'center',
+                                    title: '成交时间',
+                                    fixed: true,
+                                    sortable: true,
+                                    formatter: function(val) {
+                                        return val ? EUtils.getFormatDateTimeString(new Date(val)) : '--'
+                                    }
+                                }, {
+                                    field: 'type',
+                                    align: 'left',
+                                    title: '备注',
+                                    sortable: true
+                                }
+                            ]
+                        ],
+                        onBeforeLoad: function(param) {
+                            that.getQueryParam(param);
+                        }
+                    };
+                    API.METHODS.loadData('#data_order_table', optionData);
+                },
+                search() {
+                    this.getQueryParam();
+                    $('#data_order_table').datagrid('gotoPage', 1);
+                },
+                getQueryParam: function(param) {
+                    var queryParams = param || {};
+                    queryParams.faccount_id = $('#data_order .accountSelect').val();
+                    queryParams.source = $('#data_order .sourceSelect').val();
+                    queryParams._v = 2;
+
+                    var side = $('#data_order .directionSelect').val();
+                    if (side == 'all') {
+                        delete queryParams.side;
+                    } else {
+                        queryParams.side = side;
+                    }
+
+                    var sdate = $('#data_order .startTime').val();
+                    var edate = $('#data_order .endTime').val();
+                    if (sdate) {
+                        queryParams.sdate = sdate
+                    } else {
+                        delete queryParams.sdate;
+                    }
+                    if (edate) {
+                        queryParams.edate = edate
+                    } else {
+                        delete queryParams.edate;
+                    }
+
+                    queryParams.ccode = $('#data_order .data_order_keyword').val().replace(/\D+/g, '');
+                    return queryParams;
+                },
+                getDataByUrl: function(url, option, callBack) {
+                    API.METHODS.getData(url, option, function(res) {
+                        if (res.status == 0) {
+                            callBack && callBack(res);
+                        }
+                    }, 'get')
+                },
+                getAccountListOption: function() {
+                    var url = '/api/faccount/list';
+                    var that = this;
+                    this.getDataByUrl(url, {}, function(res) {
+                        var data = [{
+                            id: "",
+                            name: "全部"
+                        }].concat(
+                            res.data.map(e => {
+                                return {
+                                    id: e.faccount_id,
+                                    name: e.fname
+                                };
+                            })
+                        );
+                        EUtils.initSelect('#data_order .accountSelect', data, {
+                            multiple: false,
+                            editable: true
+                        });
+                    });
+                },
+                getDirection: function() {
+                    var data = [{
+                        'id': 'all',
+                        'name': '全部'
+                    }, {
+                        'id': 0,
+                        'name': '买入'
+                    }, {
+                        'id': 1,
+                        'name': '卖出'
+                    }];
+                    EUtils.initSelect('#data_order .directionSelect', data, {
+                        multiple: false,
+                        editable: false
+                    });
+                },
+                getSource: function() {
+                    var data = [{
+                        'id': '2',
+                        'name': '全部'
+                    }, {
+                        'id': 0,
+                        'name': '私有券池'
+                    }, {
+                        'id': 1,
+                        'name': '公共券池'
+                    }];
+                    EUtils.initSelect('#data_order .sourceSelect', data, {
+                        multiple: false,
+                        editable: false
+                    });
+                },
+                getStatus: function() {
+                    var url = '/api/public/option/order/status';
+                    var that = this;
+                    this.getDataByUrl(url, {}, function(vm, res) {
+                        var data = res.data;
+                        var result = [];
+                        for (key in data) {
+                            result.push({
+                                id: key,
+                                name: data[key]
+                            })
+                        }
+                        result.unshift({
+                            'id': '',
+                            name: '全部'
+                        });
+                        that.initSelect('#data_order .statusSelect', result, {
+                            multiple: true
+                        });
+                    });
+                },
+
+                getTimeType: function() {
+                    this.initSelect('#data_order .timeTypeSelect', [{
+                        'id': 'otime',
+                        'name': '委托时间'
+                    }, {
+                        'id': 'dtime',
+                        'name': '成交时间'
+                    }])
+                },
+                getExcel() {
+                    //防止猛点
+                    var params = this.getQueryParam();
+                    var baseUrl = "/api/export/order";
+                    var temp = $.extend({
+                        isnew: 1
+                    }, params);
+                    EUtils.downloadExcel(baseUrl, temp);
+                },
+                openDetail(row) {
+                    try {
+                        var items = row.costs && JSON.parse(row.costs);
+                        var data = [];
+                        for (var i = 0; i < items.length; i++) {
+                            data.push({
+                                title: items[i][0],
+                                value: items[i][1]
+                            })
+                        }
+                        if (data.length == 0) {
+                            EUtils.openWindow('#data_order #win_msg', function() {
+                                EUtils.closeWindow('#data_order #win_msg')
+                            });
+                        } else {
+                            EUtils.openWindow('#data_order .order_cost_detail', function() {
+                                EUtils.closeWindow('#data_order .order_cost_detail')
+                            });
+                            $('#data_order .order_cost_detail_table').datagrid({
+                                data: data,
+                                scrollbarSize: 0,
+                                border: false,
+                                singleSelect: true,
+                                striped: true,
+                                fitColumns: true,
+                                scrollbarSize: 0,
+                                columns: [
+                                    [{
+                                        field: 'title',
+                                        width: 150,
+                                        align: 'center',
+                                        title: '费用科目'
+                                    }, {
+                                        field: 'value',
+                                        width: 250,
+                                        halign: 'center',
+                                        align: 'right',
+                                        title: '费用金额（元）',
+                                        formatter: API.METHODS.numberFormatter
+                                    }, ]
+                                ]
+                            });
+                        }
+                    } catch (e) {
+                        EUtils.openWindow('#data_order #win_format_msg', function() {
+                            EUtils.closeWindow('#data_order #win_format_msg')
+                        });
+                    }
+                }
+            };
+            controller.init(view, model);
+        }();
+    </script>
+</body>
+
+</html>

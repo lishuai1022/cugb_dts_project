@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>DTS交易平台</title>
+    <link rel="shortcut icon" href="logo.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="/resources/easyui/themes/dts_theme/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/resources/easyui/themes/icon.css">
+    <script src="/resources/js/json2.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/resources/easyui/js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/resources/easyui/js/jquery.easyui.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/resources/easyui/locale/easyui-lang-zh_CN.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="/resources/css/main.css?t=0127">
+    <script src="/resources/js/jr.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/resources/js/util.js"></script>
+    <script type="text/javascript" src="/resources/js/easyui-util.js"></script>
+
+
+
+
+    <script type="text/javascript">
+        ! function() {
+            var isLogin = API.METHODS.checkLogin();
+            if (!isLogin) {
+                window.location.href = '/login.html';
+            }
+        }();
+    </script>
+</head>
+<style type="text/css">
+    body {
+        /*background-color: #424156;*/
+        color: #fff;
+    }
+    
+    .hide {
+        display: none;
+    }
+    
+    .show {
+        display: block;
+    }
+    
+    .index-nav {
+        min-height: 40px;
+        width: 100%;
+        font-size: 14px;
+        min-width: 680px;
+        background-color: rgba(78, 75, 106, 1);
+        margin-bottom: 0px;
+    }
+    
+    .index-nav ul {
+        width: auto;
+        /*宽度也改为自动*/
+        list-style-type: none;
+        white-space: nowrap;
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .index-nav ul {
+        float: left;
+    }
+    
+    .index-nav ul li {
+        display: inline-block;
+        width: 110px;
+        height: 40px;
+        line-height: 40px;
+        float: left;
+        text-align: center;
+        cursor: pointer;
+        -moz-user-select: none;
+        /*火狐*/
+        -webkit-user-select: none;
+        /*webkit浏览器*/
+        -ms-user-select: none;
+        /*IE10*/
+        -khtml-user-select: none;
+        /*早期浏览器*/
+        -o-user-select: none;
+        /* Opera*/
+        user-select: none;
+    }
+    
+    .index-nav ul li span {
+        display: inline-block;
+        width: 12px;
+        height: 13px;
+        vertical-align: top;
+        margin-top: 14px;
+    }
+    
+    .index-nav ul li span.openWin {
+        background-image: url('/resources/images/ding01.svg');
+    }
+    
+    .index-nav ul li span.openWin.active {
+        background-image: url('/resources/images/ding01_active.svg');
+    }
+    
+    .index-nav ul li span.cusTab {
+        background-image: url('/resources/images/ding02.svg');
+    }
+    
+    .index-nav ul li span.cusTab.active {
+        background-image: url('/resources/images/ding02_active.svg');
+    }
+    
+    .index-nav .active {
+        background-color: #FF4C4C !important;
+    }
+    
+    .index-nav ul li:hover {
+        background: #884848;
+    }
+    
+    .index-nav ul li:after {
+        content: '';
+        display: inline-block;
+        width: 1px;
+        height: 20px;
+        color: #fff;
+    }
+    
+    .index-nav .nav-right {
+        float: right;
+        display: inline-block;
+        line-height: 40px;
+        padding-right: 5px;
+    }
+    
+    .index-nav .nav-right img {
+        cursor: pointer;
+    }
+    
+    .menu-shadow {
+        display: none!important;
+    }
+</style>
+
+<body>
+    <div id="index_page" style="height:100%;width:100%;">
+        <div class="title-bar"></div>
+        <div class="index-nav clearfix">
+            <ul class="hide clearfix">
+                <li class="active" data-index="0">私有券池
+                    <span class="cusTab active"></span>
+                </li>
+                <li data-index="1" id="public_position">公共券池
+                    <span class="cusTab"></span>
+                </li>
+                <li data-index="2">未成委托
+                    <span class="cusTab"></span>
+                </li>
+                <li data-index="3">未平仓位
+                    <span class="cusTab"></span>
+                </li>
+                <li data-index="4">委托记录
+                    <span class="cusTab"></span>
+                </li>
+                <!-- <li data-index="5">成交记录
+                    <span class="cusTab"></span>
+                </li>  -->
+                <li data-index="6">盈亏报表
+                    <span class="cusTab"></span>
+                </li>
+            </ul>
+            <div class="nav-right" id="userOpt">
+                <span class="text" style="font-size: 12px;"></span>
+                <img class="" src="/resources/images/settings.svg" alt="" style="vertical-align: top;margin:12px;height:16px;width:16px;" onclick="onClickSettings()">
+                <img class="dowload" src="/resources/images/download.svg" alt="" style="vertical-align: top;margin:12px;height:16px;width:16px;" onmouseover="javascript:showDowMenu()">
+                <img class="close" src="/resources/images/close.svg" alt="" style="vertical-align: top;margin:12px;height:16px;width:16px;">
+
+
+            </div>
+        </div>
+        <iframe id="abc" class="index_frame" src="view/position.html" frameborder="0" style="width:100%;height:calc(100% - 40px)"></iframe>
+
+        <div class="easyui-menu" data-options="onClick:menuHandler,minWidth:125" style="background-color:rgb(97,96,125)">
+            <div data-options="id:1" class="menu-item">Win客户端</div>
+            <div class="menu-sep" style="margin: 0;border-top: none;border-bottom: 1px solid rgb(84,83,108)"></div>
+            <div data-options="id:2">Mac客户端</div>
+            <div class="menu-sep" style="margin: 0;border-top: none;border-bottom: 1px solid rgb(84,83,108)"></div>
+            <div data-options="id:3">SDK</div>
+            <div class="menu-sep" style="margin: 0;border-top: none;border-bottom: 1px solid rgb(84,83,108)"></div>
+            <div data-options="id:4">使用说明</div>
+
+        </div>
+    </div>
+    <div id="win_user_logout" title="提示" style="width:300px;">
+        <p style="text-align: center;padding:0px 0;">确定要退出该账户吗</p>
+        <div class="dialog_footer">
+            <a class="btn-border btn-no" data-options="iconCls:'icon-cancel'" onclick="$('#win_user_logout').window('close')" style="width:90px;border: 1px solid rgba(255, 255, 255, 0.1);background:transparent">取消</a>
+            <a class="btn-red btn-ok" data-options="iconCls:'icon-ok'" style="width:90px;margin-left:20px;">确定</a>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var windowManage = {};
+
+        function setUser() {
+            var user = STORAGE.getItem('user');
+            $('#userOpt .text').text('欢迎您，' + user.trader_name + '(' + (user.account || '--') + ')');
+
+            $('#userOpt .close').on('click', function() {
+                EUtils.openWindow('#win_user_logout', function() {
+                    EUtils.closeWindow('#win_user_logout')
+                    for (let key in windowManage) {
+                        if (windowManage[key] && !windowManage[key].closed) {
+                            windowManage[key].close();
+                        }
+                    }
+                    API.METHODS.removeUserInfo();
+                    window.location.href = '/login.html';
+                });
+            })
+        }
+
+        function showDowMenu() {
+            $('.easyui-menu').menu('show', {
+                left: $('.index-nav .dowload').offset().left,
+                top: $('.index-nav .dowload').offset().top + 30,
+            })
+        }
+
+        function menuHandler(item) {
+            switch (item.id) {
+                case 1:
+                    window.location.href = "https://app.pz.youlikj.com/DTS-1.1.0.exe";
+                    break;
+                case 2:
+                    window.location.href = "https://app.pz.youlikj.com/DTS-1.1.0.dmg";
+                    break;
+                case 3:
+                    window.location.href = "/static/upload/dts/dts交易系统接入文档.zip"
+                    break
+                case 4:
+                    window.location.href = "https://app.pz.youlikj.com/dts%E4%BA%A4%E6%98%93%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E.zip?t=" + new Date().getTime();
+                    break
+            }
+        }
+
+        function getTraderInfo() {
+            var url = '/api/query/traderinfo';
+            API.METHODS.getData(url, {}, function(res) {
+                if (res.status == 0) {
+                    setNav(res.data.public_stock);
+                }
+            })
+        }
+
+        function setNav(param) {
+            var actoins = [
+                'view/position.html',
+                'view/public_position.html',
+                'view/entrust.html',
+                'view/uncovered_position.html',
+                'view/entrust_record.html',
+                'view/transaction_record.html',
+                'view/profit_loss.html'
+            ];
+            var actionsClassMap = {
+                'cusTab': 'openWin',
+                'openWin': 'cusTab',
+                'cusTab active': 'openWin active',
+                'openWin active': 'cusTab active'
+            };
+
+            if (param == '0') {
+                $('#public_position').remove();
+            }
+
+            $('.index-nav ul').removeClass('hide');
+
+            $('.index-nav ul li span').on('click', function() {
+                var disable = $(this).attr('data-status');
+                var className = $(this).attr('class');
+                var altName = actionsClassMap[className];
+                $(this).attr('class', altName)
+                return false;
+            })
+            $('.index-nav ul li').on('click', function() {
+                var index = $(this).attr('data-index');
+                var dingClass = $(this).find('span').attr('class');
+                if (dingClass.indexOf('openWin') != -1) {
+                    clickNav(parseInt(index));
+                } else {
+                    $(this).addClass('active').siblings().removeClass('active');
+                    $('.index-nav ul li span').removeClass('active');
+                    $(this).find('span').addClass('active');
+                    $('#abc').attr('src', actoins[index] + '?iframe');
+                }
+
+            })
+
+        }
+
+        function clickNav(nIndex) {
+            var height = window.screen.availHeight;
+            var width = window.screen.availWidth;
+            if (width / 1.5 < 1045) {
+                width = 1045 * 1.5;
+            }
+            //top值 如果高度都是屏幕的50%  每个top值需要依次增加30 如果不是需要自己调整top值 let计算方式相同
+            switch (nIndex) {
+                case 0: //私有券池
+                    if (windowManage.pswindow) {
+                        windowManage.pswindow.close();
+                        delete windowManage.pswindow;
+                        setTimeout(function() {
+                            windowManage.pswindow = window.open('/view/position.html', '私有券池', `left=${(width-width/1.5)/2},top=${height/4 - 30},height=${height/2}, width=${width/1.5}`);
+                        }, 200)
+                    } else {
+                        windowManage.pswindow = window.open('/view/position.html', '私有券池', `left=${(width-width/1.5)/2},top=${height/4 - 30},height=${height/2}, width=${width/1.5}`);
+                    }
+                    break;
+                case 1: //公共券池
+                    if (windowManage.pbwindow) {
+                        windowManage.pbwindow.close();
+                        delete windowManage.pbwindow;
+                        setTimeout(function() {
+                            windowManage.pbwindow = window.open('/view/public_position.html', '公共券池', `left=${(width-width/1.5)/2},top=${height/4 - 30},height=${height/2}, width=${width/1.5}`);
+                        }, 200)
+                    } else {
+                        windowManage.pbwindow = window.open('/view/public_position.html', '公共券池', `left=${(width-width/1.5)/2},top=${height/4 - 30},height=${height/2}, width=${width/1.5}`);
+                    }
+                    break;
+                case 2: //公共券池
+                    if (windowManage.ewindow) {
+                        windowManage.ewindow.close();
+                        delete windowManage.ewindow;
+                        setTimeout(function() {
+                            windowManage.ewindow = window.open('/view/entrust.html', '未成委托', `left=${(width-width/1.5)/2},top=${height/4 - 30},height=${height/2}, width=${width/1.5}`);
+                        }, 200)
+                    } else {
+                        windowManage.ewindow = window.open('/view/entrust.html', '未成委托', `left=${(width-width/1.5)/2},top=${height/4 - 30},height=${height/2}, width=${width/1.5}`);
+                    }
+                    break;
+                case 3: //未平仓位
+                    if (windowManage.upwindow) {
+                        windowManage.upwindow.close();
+                        delete windowManage.upwindow;
+                        setTimeout(function() {
+                            windowManage.upwindow = window.open('/view/uncovered_position.html', '未平仓位', `left=${(width-width/2)/2},top=${height/4+30},height=${height/2}, width=${width/2}`);
+                        }, 200)
+                    } else {
+                        windowManage.upwindow = window.open('/view/uncovered_position.html', '未平仓位', `left=${(width-width/2)/2},top=${height/4+30},height=${height/2}, width=${width/2}`);
+                    }
+                    break;
+                case 4: //委托记录
+                    if (windowManage.erwindow) {
+                        windowManage.erwindow.close();
+                        delete windowManage.erwindow;
+                        setTimeout(function() {
+                            windowManage.erwindow = window.open('/view/entrust_record.html', '委托记录', `left=${(width-width/1.5)/2},top=${height/4+30*2},height=${height/2}, width=${width/1.5}`);
+                        }, 200)
+                    } else {
+                        windowManage.erwindow = window.open('/view/entrust_record.html', '委托记录', `left=${(width-width/1.5)/2},top=${height/4+30*2},height=${height/2}, width=${width/1.5}`);
+                    }
+                    break;
+                case 5: //成交记录
+                    if (windowManage.trwindow) {
+                        windowManage.trwindow.close();
+                        delete windowManage.trwindow;
+                        setTimeout(function() {
+                            windowManage.trwindow = window.open('/view/transaction_record.html', '成交记录', `left=${(width-width/1.5)/2},top=${height/4+30*3},height=${height/2}, width=${width/1.5}`);
+                        }, 200)
+                    } else {
+                        windowManage.trwindow = window.open('/view/transaction_record.html', '成交记录', `left=${(width-width/1.5)/2},top=${height/4+30*3},height=${height/2}, width=${width/1.5}`);
+                    }
+                    break;
+                case 6: //盈亏报表
+                    if (windowManage.plwindow) {
+                        windowManage.plwindow.close();
+                        delete windowManage.plwindow;
+                        setTimeout(function() {
+                            windowManage.plwindow = window.open('/view/profit_loss.html', '盈亏报表', `left=${(width-width/1.5)/2},top=${height/4+30*4},height=${height/2}, width=${width/1.5}`);
+                        }, 200)
+                    } else {
+                        windowManage.plwindow = window.open('/view/profit_loss.html', '盈亏报表', `left=${(width-width/1.5)/2},top=${height/4+30*4},height=${height/2}, width=${width/1.5}`);
+                    }
+                    break;
+            }
+        }
+
+        getTraderInfo();
+
+        function onClickSettings() {
+            var height = window.screen.availHeight;
+            var width = window.screen.availWidth;
+            var userAgent = navigator.userAgent.toLowerCase();
+            var openHeight = userAgent.indexOf('electron/') > -1 ? 315 : 315;
+            var openWidth = userAgent.indexOf('electron/') > -1 ? 465 : 445;
+            if (windowManage.swindow) {
+                windowManage.swindow.close();
+                delete windowManage.swindow;
+                setTimeout(function() {
+                    windowManage.swindow = window.open('/view/setting.html', '设置', `left=${(width-openWidth)/2},top=${(height-openHeight)/2},width=${openWidth},height=${openHeight},risizable=false`);
+                }, 200)
+            } else {
+                windowManage.swindow = window.open('/view/setting.html', '设置', `left=${(width-openWidth)/2},top=${(height-openHeight)/2},width=${openWidth},height=${openHeight},risizable=false`);
+            }
+        }
+
+        function setLogoutWindow() {
+            $('#win_user_logout').window({
+                closable: true,
+                modal: true,
+                inline: true,
+                resizable: false,
+                collapsible: false,
+                minimizable: false,
+                maximizable: false,
+                closed: true
+            });
+        }
+        setUser();
+        setLogoutWindow();
+        window.addEventListener('storage', function(e) {
+            if (e.key == 'user') {
+                var user = STORAGE.getItem('user');
+                if (user == '') {
+                    for (let key in windowManage) {
+                        if (windowManage[key] && !windowManage[key].closed) {
+                            windowManage[key].close();
+                        }
+                    }
+                    window.location.href = '/login.html';
+                }
+            }
+        })
+
+        window.onbeforeunload = function() {
+            for (let key in windowManage) {
+                if (windowManage[key] && !windowManage[key].closed) {
+                    windowManage[key].close();
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

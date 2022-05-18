@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="max-age=720000" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="/resources/css/static.css">
+    <link rel="stylesheet" type="text/css" href="/resources/css/main.css?t=0127">
+    <style>
+        html,
+        body {
+            background-color: rgba(66, 64, 87, 1);
+        }
+        
+        #window {
+            position: relative;
+            background-color: rgba(66, 64, 87, 1);
+            padding: 10px 0;
+        }
+        
+        .modal-row {
+            width: 100%;
+        }
+        
+        .modal-row-left {
+            float: left;
+            line-height: 17px;
+            height: 17px;
+            width: 25%;
+            text-align: left;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .modal-row-center {
+            float: left;
+            line-height: 17px;
+            height: 17px;
+            width: 37%;
+            color: #aaa;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .modal-row-right {
+            float: left;
+            line-height: 17px;
+            height: 17px;
+            width: 38%;
+            text-align: right;
+            font-size: 12px;
+            color: #fff;
+        }
+        
+        .modal-row:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+        
+        .modal-cell {
+            float: left;
+            width: 50%;
+            height: 20px;
+            padding-left: 8px;
+            line-height: 20px;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .dialog-row {
+            position: relative;
+            font-size: 12px;
+            color: #fff;
+        }
+        
+        .modal-cell label,
+        .dialog-row label {
+            display: inline-block;
+            font-size: 12px;
+            color: #9492b0;
+            height: 24px;
+            line-height: 24px;
+        }
+        
+        .dialog-row label {
+            width: 100px;
+            text-align: right;
+        }
+        
+        .dialog-row input {
+            vertical-align: middle;
+            height: 24px;
+            line-height: 24px;
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.1);
+            padding-left: 10px;
+            padding-right: 10px;
+            color: #fff;
+        }
+        
+        .modal-cell .modal-inputfield {
+            position: relative;
+            display: inline-block;
+            width: 85px;
+            box-sizing: border-box;
+            height: 24px;
+            line-height: 24px;
+            /* height: 40px; */
+        }
+        
+        .modal-cell .modal-inputfield .tip {
+            position: absolute;
+            min-width: 140px;
+            text-align: center;
+            top: -25px;
+            color: #fff;
+            background: #ff4c4c;
+        }
+        
+        .modal-cell .modal-inputfield .tip:after {
+            position: absolute;
+            bottom: -5px;
+            left: 2px;
+            content: '';
+            display: block;
+            border-top: 5px solid #ff4c4c;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+        }
+        /* .modal-cell .modal-inputfield:after {
+            position: absolute;
+            right: 7px;
+            top: 7px;
+            content: '';
+            display: block;
+            background: url('/resources/images/icon_arrow_updown.png') no-repeat 50% 50%;
+            width: 6px;
+            height: 9px;
+            background-size: contain;
+        } */
+        
+        .arrow {
+            width: 10px;
+            height: 24px;
+            position: absolute;
+            right: 5px;
+            top: 0;
+        }
+        
+        .arrow-up {
+            cursor: pointer;
+            height: 11px;
+            width: 14px;
+            /* margin-top: 5px; */
+            background: url('/resources/images/arrow-up-enable.png') no-repeat 50% 100%;
+        }
+        
+        .arrow-up.disabled {
+            background: url('/resources/images/arrow-up-disable.png') no-repeat 50% 100%;
+        }
+        
+        .arrow-down {
+            cursor: pointer;
+            height: 11px;
+            width: 14px;
+            background: url('/resources/images/arrow-down-enable.png') no-repeat 50% 0%;
+        }
+        
+        .arrow-down.disabled {
+            background: url('/resources/images/arrow-down-disable.png') no-repeat 50% 0%;
+        }
+        
+        .modal-inputfield input[type="text"] {
+            /* position: absolute; */
+            box-sizing: border-box;
+            left: 0;
+            width: 80px;
+            height: 24px;
+            line-height: 24px;
+            padding-left: 5px;
+            padding-right: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            background: #595677;
+            border: 1px solid #5f5c79;
+            color: #fff;
+        }
+        
+        .modal-cell:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+        
+        .modal-cell span {
+            font-size: 12px;
+        }
+        
+        .fl {
+            float: left;
+        }
+        
+        .container {
+            padding-left: 5px;
+            padding-right: 5px;
+            border-top: 1px solid rgba(84, 82, 110, 1);
+        }
+        
+        .container .modal-row {
+            border-bottom: 1px solid rgba(84, 82, 110, 1);
+        }
+        
+        .modal-footer,
+        .dialog-footer {
+            box-sizing: border-box;
+            padding-top: 10px;
+            padding-bottom: 15px;
+            text-align: center;
+            /* padding-top: 25px; */
+        }
+        
+        .dialog-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+        }
+        
+        .btn-setting {
+            display: inline-block;
+            cursor: pointer;
+            height: 20px;
+            line-height: 20px;
+            background: rgba(89, 86, 119, 1);
+            color: #fff;
+            font-size: 12px;
+            padding: 0 5px;
+        }
+        
+        .arrow-setting {
+            position: relative;
+            top: 4px;
+            margin-left: 5px;
+            margin-right: 5px;
+            cursor: pointer;
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            background: url(/resources/images/down.png) no-repeat 50% 50%;
+            background-size: contain
+        }
+        
+        .arrow-setting.up {
+            background: url(/resources/images/up.png) no-repeat 50% 50%;
+        }
+        
+        .deal-setting {
+            position: relative;
+            top: 3px;
+            cursor: pointer;
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            background: url(/resources/images/up.png) no-repeat 50% 50%;
+            background-size: contain;
+        }
+        
+        .deal-setting.shrink {
+            transform: rotateZ(90deg);
+        }
+        
+        .deal-setting.spread {
+            transform: rotateZ(-90deg);
+        }
+        
+        .btn-sell {
+            position: relative;
+            top: -1px;
+            display: inline-block;
+            box-sizing: border-box;
+            background: green;
+            width: 60px;
+            height: 24px;
+            font-size: 12px;
+            color: #fff;
+            text-align: center;
+            line-height: 24px;
+            cursor: pointer;
+        }
+        
+        .btn-buy,
+        .btn-ok {
+            display: inline-block;
+            box-sizing: border-box;
+            background: rgba(255, 76, 76, 1);
+            width: 60px;
+            height: 24px;
+            font-size: 12px;
+            margin-right: 20px;
+            color: #fff;
+            text-align: center;
+            line-height: 24px;
+            cursor: pointer;
+        }
+        
+        .btn-buy {
+            margin-right: 0;
+        }
+        
+        .btn-cancel {
+            display: inline-block;
+            box-sizing: border-box;
+            background: transparent;
+            width: 60px;
+            height: 24px;
+            font-size: 12px;
+            color: #fff;
+            text-align: center;
+            line-height: 24px;
+            cursor: pointer;
+            margin-right: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-ok {
+            margin-right: 0
+        }
+        
+        .btn-buy.active,
+        .btn-sell.active {
+            border: 2px solid #fff;
+            line-height: 20px;
+        }
+        
+        .dialog {
+            background: #514F6A;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 230px;
+            border: 1px solid rgba(95, 92, 121, 1)
+        }
+        
+        .dialog-header {
+            position: relative;
+            height: 30px;
+            line-height: 30px;
+            text-align: left;
+            padding-left: 10px;
+            color: #d5d5d5;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dialog-header .icon-close {
+            position: absolute;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url(/resources/images/input_icon_cancel.png) no-repeat;
+            background-size: contain;
+            top: 6px;
+            right: 10px;
+        }
+        
+        .dialog-body {
+            padding: 10px 10px;
+        }
+        
+        .modal {
+            position: relative;
+            background: transparent;
+            padding-right: 180px;
+        }
+        
+        #quotation {
+            float: left;
+            width: 100%;
+        }
+        
+        #deal {
+            box-sizing: border-box;
+            padding-left: 10px;
+            padding-right: 10px;
+            position: absolute;
+            top: 0;
+            bottom: 10px;
+            right: 0;
+        }
+        
+        .flex {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            width: 100%;
+            color: #9492B0;
+            font-size: 12px;
+        }
+        
+        .flex-header div {
+            color: #9492B0;
+        }
+        
+        .flex-item {
+            flex: 1;
+            line-height: 17px;
+            color: white;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .center {
+            text-align: center;
+        }
+        
+        .right {
+            text-align: right;
+        }
+        
+        .unit {
+            position: absolute;
+            font-size: 12px;
+            right: 10px;
+            line-height: 24px;
+        }
+        
+        .setting-wrap {
+            position: absolute;
+            right: 6px;
+            top: 0;
+        }
+        
+        .layout-left {
+            float: left;
+            padding-right: 5px;
+            width: 50%;
+        }
+        
+        .layout-right {
+            float: right;
+            padding-left: 5px;
+            width: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="window">
+        <div :style="{'display': s_pLevels[0].length==0 ? 'block': 'none'}" style="text-align: center;margin-top: 50%;transform: translate(0,-90%);">
+            <div class="loader-01"></div>
+            <div style="margin-top:10px;color:#ccc">数据加载中...</div>
+        </div>
+        <div :style="{'display': s_pLevels[0].length > 0 ? 'block': 'none'}" style="display: none;">
+            <div class="modal clearfix" :style="{'padding-right': (level == 2 && showDeal) ? '180px' : 0}">
+                <div id="quotation">
+                    <div class="modal-row">
+                        <div class="modal-cell" style="position: relative; width: 100%">
+                            <label>账户&nbsp;</label> {{ (fname && fname.length > 12) ? fname.substr(0,12) + '...' : fname }}
+                            <div class="setting-wrap">
+                                <a class="btn-setting" @click="openSetting">设置</a>
+                                <i class="arrow-setting" :class="{'up':showInfor}" @click="handleInfor('showInfor')"></i>
+                                <i class="deal-setting" v-if="level==2" :class="{'shrink':!showDeal, 'spread':showDeal}" @click=" handleInfor('showDeal') "></i>
+                            </div>
+                        </div>
+                        <div class="modal-cell " v-if="showInfor " @click="changeTxtSize(s_info.curPrice) " style="width: 45% ">
+                            <label>最新&nbsp;</label> <span class="text-red ">{{ s_info.curPrice?parseFloat(s_info.curPrice).toFixed(2)+'元':'--' }}</span>
+                        </div>
+                        <div class="modal-cell " v-if="showInfor " style="width: 55% ">
+                            <label>涨幅&nbsp;</label> <span :class="{ 'text-red':parseFloat(fluctuation)>0, 'text-green':parseFloat(fluctuation)
+                                <0} " @click="changeTxtSize(s_info.curPrice) ">{{ fluctuation+'%' }}</span>
+                        </div>
+                        <div class="modal-cell " v-if="showInfor " @click="changeTxtSize(yesterdayPriceDown) " style="width: 45% ">
+                            <label>跌停&nbsp;</label> <span class="text-green ">{{ yesterdayPriceDown }}</span>
+                        </div>
+                        <div class="modal-cell " v-if="showInfor " @click="changeTxtSize(yesterdayPriceUp) " style="width: 55% ">
+                            <label>涨停&nbsp;</label> <span class="text-red ">{{ yesterdayPriceUp }}</span>
+                        </div>
+                    </div>
+                    <div class="container clearfix " style="margin-top: 10px ">
+                        <div :class="{'layout-right':layout==2}">
+                            <div class="modal-row " v-for="v,i in levelLength " @click="changeTxtSize(s_mLevels[0][i]) " v-if="layout==2">
+                                <span class="modal-row-left ">卖{{v}}</span>
+                                <span class="modal-row-center " v-if="s_mLevels[0]&&s_mLevels[0].length>0" :class="{ 'text-green':parseFloat(yesterdayPrice)>parseFloat(s_mLevels[0][i]), 'text-red':parseFloat(yesterdayPrice)
+                                        <parseFloat(s_mLevels[0][i]), 'text-mute':parseFloat(yesterdayPrice)==parseFloat(s_mLevels[0][i])} ">
+                                {{ parseFloat(s_mLevels[0][i])?parseFloat(s_mLevels[0][i]).toFixed(2):'--' }}
+                                </span>
+                                <span class="modal-row-center " v-else>--</span>
+                                <span class="modal-row-right " v-if="s_mLevels[0]&&s_mLevels[0].length>0"> {{ parseFloat(s_mLevels[1][i]).toFixed(0)|unitFilter }}
+                                            </span>
+                                <span class="modal-row-right" v-else>--</span>
+                            </div>
+                            <div class="modal-row " v-for="v,i in levelLength " @click="changeTxtSize(s_mLevels[0][levelLength-v]) " v-if="layout!=2">
+                                <span class="modal-row-left ">卖{{levelLength-i}}</span>
+                                <span class="modal-row-center " v-if="s_mLevels[0]&&s_mLevels[0].length>0" :class="{ 'text-green':parseFloat(yesterdayPrice)>parseFloat(s_mLevels[0][levelLength-v]), 'text-red':parseFloat(yesterdayPrice)
+                                        <parseFloat(s_mLevels[0][levelLength-v]), 'text-mute':parseFloat(yesterdayPrice)==parseFloat(s_mLevels[0][levelLength-v])} ">
+                                {{ parseFloat(s_mLevels[0][levelLength-v])?parseFloat(s_mLevels[0][levelLength-v]).toFixed(2):'--' }}
+                                </span>
+                                <span class="modal-row-center " v-else>--</span>
+                                <span class="modal-row-right " v-if="s_mLevels[0]&&s_mLevels[0].length>0"> {{ parseFloat(s_mLevels[1][levelLength-v]).toFixed(0)|unitFilter }}
+                                            </span>
+                                <span class="modal-row-right" v-else>--</span>
+                            </div>
+                        </div>
+                        <div style="border-bottom: 1px solid #aaa7c8;" v-if="layout != 2"></div>
+                        <div :class="{'layout-left':layout==2}">
+                            <div class="modal-row" v-for="v,i in levelLength" @click="changeTxtSize(s_pLevels[0][i])">
+                                <span class="modal-row-left">买{{ v }}</span>
+                                <span class="modal-row-center" v-if="s_pLevels[0]&&s_pLevels[0].length>0" :class="{
+                                    'text-green':parseFloat(yesterdayPrice)>parseFloat(s_pLevels[0][i]),
+                                    'text-red':parseFloat(yesterdayPrice)<parseFloat(s_pLevels[0][i]),
+                                    'text-mute':parseFloat(yesterdayPrice)==parseFloat(s_mLevels[0][levelLength-v])}">
+                                {{ parseFloat(s_pLevels[0][i])?parseFloat(s_pLevels[0][i]).toFixed(2):'--' }}</span>
+                                <span class="modal-row-center" v-else>--</span>
+                                <span class="modal-row-right" v-if="s_pLevels[1]&&s_pLevels[1].length>0">{{ parseFloat(s_pLevels[1][i]).toFixed(0) | unitFilter }}</span>
+                                <span cclass="modal-row-right" v-else>--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-row" style="margin-top: 5px">
+                        <div class="modal-cell" style="position: relative;padding-left: 35px;padding-right: 5px;" @click="cNum=mbcount||0">
+                            <label style="position: absolute; left: 5px; line-height: 24px;">可买&nbsp;</label><span class="text-red" style="line-height: 24px;">{{ mbcount||0 }}</span>
+                        </div>
+                        <div class="modal-cell" style="position: relative; padding-left: 30px; padding-right: 5px;" @click="cNum=mscount||0">
+                            <label style="position: absolute; left: 0; line-height: 24px;">可卖&nbsp;</label><span class="text-green" style="line-height: 24px;"> {{ mscount }}</span>
+                        </div>
+                    </div>
+                    <div class="modal-row" style="margin-top: 5px">
+                        <div class="modal-cell" style="position: relative;padding-left: 35px;padding-right: 5px;height: 24px;">
+                            <label class="fl" style="position: absolute; left: 5px; line-height: 24px;">价格&nbsp;</label>
+                            <div class="modal-inputfield fl" style="width: 100%">
+                                <label class="tip" v-if="tip">{{ tip }}</label>
+                                <input type="text" v-model="cPrice" style="width: 100%">
+                                <div class="arrow">
+                                    <div class="arrow-up" @click="addPrice" :class="{'disabled':noPAdd}">
+                                    </div>
+                                    <div class="arrow-down" style="margin-top: 2px" @click="reducePrice" :class="{'disabled':noPReduce}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-cell" style="position: relative; padding-left: 30px; padding-right: 5px;">
+                            <label class="fl" style="position: absolute; left: 0; line-height: 24px;">数量&nbsp;</label>
+                            <div class="modal-inputfield fl" style="width: 100%;">
+                                <input type="text" v-model="cNum" style="width: 100%">
+                                <div class="arrow">
+                                    <div class="arrow-up" @click="addNum">
+                                    </div>
+                                    <div class="arrow-down" style="margin-top:2px" @click="reduceNum">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" v-if="operator">
+                        <div class="btn-buy" v-if="operator=='B'" @click="handleTradeBtn(0)">买 入</div>
+                        <div class="btn-sell" v-if="operator=='S'" @click="handleTradeBtn(1)">卖 出</div>
+                    </div>
+                </div>
+                <div id="deal" style="width: 180px;" v-if="level == 2 && showDeal">
+                    <div class="modal-cell" style="width: 100%">
+                        逐笔成交
+                    </div>
+                    <div class="flex flex-header">
+                        <div class="flex-item right">时间</div>
+                        <div class="flex-item right" style="padding-left: 6px; padding-right: 6px;">价格</div>
+                        <div class="flex-item right">手数</div>
+                    </div>
+                    <div class="flex" v-for="n in (tradeLength - 1)">
+                        <div class="flex-item right">{{ (trade[30 - tradeLength + n] && trade[30 - tradeLength + n]['time']) | timeFilter }}</div>
+                        <div class="flex-item right" style="padding-left: 8px; padding-right: 8px;">{{ (trade[30 - tradeLength + n] && trade[30 - tradeLength + n]['price']) || '--' }}</div>
+                        <div class="flex-item right" :class="{'text-red':(trade[30 - tradeLength + n]&&trade[30 - tradeLength + n]['flag']=='B'),'text-green':(trade[30 - tradeLength + n]&&trade[30 - tradeLength + n]['flag']=='S')}">{{ (trade[30 - tradeLength + n] && trade[30 - tradeLength + n]['volume']) | tradeFilter }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dialog" v-if="showSettingDialog">
+                <div class="dialog-header">设置<i class="icon-close" @click="cancelSetting"></i></div>
+                <div class="dialog-body">
+                    <div class="dialog-row">
+                        <label>股票代码：</label> {{cname}}/{{ccode}}
+                    </div>
+                    <div class="dialog-row">
+                        <label>左右键股数调整：</label><input type="number" v-model="leftRightUnit" style="width: 100px">
+                        <span class="unit">股</span>
+                    </div>
+                    <div class="dialog-row" style="margin-top: 5px">
+                        <label>上下键价格调整：</label><input type="number" v-model="updownUnit" style="width: 100px">
+                        <span class="unit">分</span>
+                    </div>
+                    <div class="dialog-row" style="margin-top: 5px">
+                        <label>默认委托数量：</label><input type="number" v-model="defaultUnit" style="width: 100px">
+                        <span class="unit">股</span>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <div class="btn-cancel" @click="cancelSetting">取 消</div>
+                    <div class="btn-ok" @click="confirmSetting" style="margin-right:0">确定</div>
+                </div>
+            </div>
+
+            <div class="dialog" v-if="showComfirmDialog">
+                <div class="dialog-header">委托{{ buyType===0?'买入':'卖出' }}确认<i class="icon-close" @click="showComfirmDialog=false"></i></div>
+                <div class="dialog-body">
+                    <div class="dialog-row">
+                        <label>资金账户：</label>{{ (fname && fname.length > 8) ? fname.substr(0,8) + '...' : fname }}
+                    </div>
+                    <div class="dialog-row">
+                        <label>股票代码：</label> {{ccode}}/{{cname}}
+                    </div>
+                    <div class="dialog-row">
+                        <label>委托价格(元)：</label>{{ cPrice }}
+                    </div>
+                    <div class="dialog-row">
+                        <label>委托数量(股)：</label>{{ cNum }}
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <div class="btn-cancel" @click="showComfirmDialog=false">取 消</div>
+                    <div style="margin-right:0" :class="buyType===0?'btn-buy':'btn-sell'" @click="buy">{{buyType===0?'买 入':'卖 出'}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="/resources/js/vue.min.js"></script>
+    <script type="text/javascript" src="/resources/js/jquery.js"></script>
+    <script type="text/javascript" src="/resources/js/util.js"></script>
+    <script type="text/javascript">
+        new Vue({
+            el: '#window',
+            data: {
+                ccode: null, // 股票代码
+                cname: null, // 股票名称
+                faccount_id: null, // 资金账户id
+                cash_count: 0, // 头寸
+                fname: null, // 资金账户名称
+                source: null, // 票源
+                keyboard: {}, // 键盘快捷键
+                keyCode: null, // 按下的键盘code
+                config: null,
+                s_info: {},
+                s_pLevels: [
+                    [],
+                    []
+                ],
+                s_mLevels: [
+                    [],
+                    []
+                ],
+                yesterdayPrice: 0,
+                isSuspension: null,
+                isPost: false,
+                cPrice: null, // 委托价格
+                cNum: null, // 委托数量
+                action: null, // 键盘操作
+                priceInterval: null, // 获取websocket得到的价格，防止获取不到定义的定时器。
+                timerNumber: null,
+                noPReduce: false, //递减价钱的时候，递减到90%的时候不能再减了
+                noPAdd: false, //递增价钱的时候，递增到110%的时候不能再增了
+                noNReduce: false, //递减股数的时候，递减到90%的时候不能再减了
+                noNAdd: false,
+                mbcount: 0, // 最大可买数量
+                mscount: 0, // 最大可卖数量
+                showComfirmDialog: false,
+                showSettingDialog: false,
+                showInfor: false,
+                showDeal: true,
+                buyType: 0, // 0是买入,1是卖出
+                stock: null,
+                operator: null,
+                leftRightUnit: 100, // 左右键股数调整
+                defaultUnit: 1000,
+                updownUnit: 1,
+                level: 1,
+                layout: 1,
+                settings: {},
+                position: 0, // 头寸
+                trade: [], // 逐笔成交
+                isInitCNum: true, // 是否需要对委托数量重新进行计算，默认为true，初始化页面时候进行计算
+            },
+            watch: {
+                cNum(n, o) {
+                    if (String(n).trim() == '') {
+                        this.cNum = '';
+                    } else if (isNaN(parseInt(n)) || parseInt(n) < 0) {
+                        this.initcNum()
+                    } else {
+                        this.cNum = parseInt(n)
+                    }
+                    this.noNReduce = false;
+                    this.noNAdd = false;
+                },
+                cPrice: {
+                    immediate: true,
+                    handler: function(n, o) {
+                        var cPrice;
+                        var vm = this;
+                        if (String(n).trim() == '') {
+                            this.cPrice = '';
+                        } else if (isNaN(parseFloat(n))) {
+                            cPrice = String(this.s_info.curPrice);
+                        } else {
+                            cPrice = String(parseFloat(n));
+                        }
+                        try {
+                            if (cPrice.split('.')[1]) {
+                                this.cPrice = cPrice.split('.')[1].length > 2 ? parseFloat(cPrice).toFixed(2) : cPrice;
+                            }
+
+                            this.noPReduce = false;
+                            this.noPAdd = false;
+
+                            clearTimeout(this.timerNumber);
+                            this.timerNumber = setTimeout(function() {
+                                return vm.getMaxNumber()
+                            }, 200);
+                        } catch (e) {
+                            console.log(e)
+                        }
+                    }
+                }
+            },
+            filters: {
+                unitFilter: function(v) {
+                    if (parseFloat(v) > 0) {
+                        if (v >= 10000) {
+                            return parseFloat(v / 10000).toFixed(2) + '万';
+                        } else {
+                            return v
+                        }
+                    } else {
+                        return '--'
+                    }
+                },
+                tradeFilter: function(v) {
+                    if (parseFloat(v) > 0) {
+                        if (v >= 1000000) {
+                            return parseFloat(v / 10000).toFixed(2) + '万';
+                        } else {
+                            return Math.round(v / 100);
+                        }
+                    } else {
+                        return '--'
+                    }
+                },
+                timeFilter: function(v) {
+                    if (v) {
+                        return v.split(' ')[1];
+                    } else {
+                        return '--'
+                    }
+                }
+            },
+            computed: {
+                fluctuation: function() { // 股票涨跌幅
+                    let curPrice = parseFloat(this.s_info.curPrice),
+                        yesterdayPrice = parseFloat(this.s_info.end_price);
+                    if (curPrice && yesterdayPrice) {
+                        return ((curPrice - yesterdayPrice) / yesterdayPrice * 100).toFixed(2)
+                    } else {
+                        return 0
+                    }
+                },
+                cMoney: function() {
+                    return parseFloat(this.cNum * this.cPrice) ? (parseFloat(this.cNum * this.cPrice)).toFixed(0) : 0
+                },
+                yesterdayPriceUp() { // 涨停价
+                    let upRate = (this.s_info.stock_name && this.s_info.stock_name.toLowerCase().includes('st')) ? 1.05 : 1.1;
+                    let yesterdayPriceUp = Math.round((parseFloat(this.yesterdayPrice) || 0) * upRate * 100) / 100;
+                    return parseFloat(yesterdayPriceUp.toFixed(2))
+                },
+                yesterdayPriceDown() { // 跌停价
+                    let downRate = (this.s_info.stock_name && this.s_info.stock_name.toLowerCase().includes('st')) ? 0.95 : 0.9;
+                    let yesterdayPriceDown = Math.round((parseFloat(this.yesterdayPrice) || 0) * downRate * 100) / 100;
+                    return parseFloat(yesterdayPriceDown.toFixed(2))
+                },
+                tip: function() {
+                    if (!isNaN(parseFloat(this.cPrice))) {
+                        if (this.cPrice > this.yesterdayPriceUp) {
+                            return '委托价格不能高于涨停价'
+                        } else if (this.cPrice < this.yesterdayPriceDown) {
+                            return '委托价格不能低于跌停价'
+                        }
+                    }
+                },
+                levelLength: function() { // 买卖档数，leve1时为5，level2时为10
+                    return this.level == 2 ? 10 : 5;
+                },
+                tradeLength: function() {
+                    let level_num, info_num, confirm_num, input_num;
+                    info_num = this.showInfor ? 2 : 0; // 设置是否展开时，增加的交易行数
+                    confirm_num = this.operator ? 0 : 0; // 确认按钮是否展开时，增加的交易行数
+                    level_num = this.level == 2 ? 11 : 5; // 分别处理买卖五档和十档时所能容纳的交易行数
+                    input_num = 3; // 最大最小可卖部分所能容纳的行数
+                    level_num = this.layout == 2 ? level_num : level_num * 2;
+                    return info_num + level_num + confirm_num + input_num;
+                }
+            },
+            methods: {
+                initData() {
+                    this.stock = new Stock(this.ccode, this);
+                    this.getPrice();
+                },
+                getPrice() {
+                    let _this = this;
+                    this.priceInterval = setInterval(() => {
+                        if (this.cPrice) {
+                            clearInterval(this.priceInterval);
+                            this.priceInterval = null;
+                        } else {
+                            let mLevels = _this.s_pLevels;
+                            _this.cPrice = ((mLevels[0][0] && parseFloat(mLevels[0][0]) > 0) ? mLevels[0][0] : _this.s_info.curPrice);
+                        }
+                    }, 200)
+                },
+                reducePrice: function() {
+                    var stock = STORAGE.getItem(this.ccode) || {};
+                    var updownUnit = (stock.updownUnit % 1 > 0) ? stock.updownUnit : (stock.updownUnit / 100);
+                    this.noPAdd = false;
+                    var price = (parseFloat(this.cPrice || 0) - parseFloat(updownUnit || 0.01)).toFixed(2);
+                    if (price < this.yesterdayPriceDown) {
+                        this.noPReduce = true;
+                    } else {
+                        this.cPrice = price;
+                    }
+                },
+                //递增价钱
+                addPrice: function() {
+                    var stock = STORAGE.getItem(this.ccode) || {};
+                    var updownUnit = (stock.updownUnit % 1 > 0) ? stock.updownUnit : (stock.updownUnit / 100);
+                    this.noPReduce = false;
+                    var price = (parseFloat(this.cPrice || 0) + parseFloat(updownUnit || 0.01)).toFixed(2);
+                    if (price > this.yesterdayPriceUp) {
+                        this.noPAdd = true;
+                    } else {
+                        this.cPrice = price;
+                    }
+                },
+                //递减数量
+                reduceNum: function() {
+                    this.noNAdd = false;
+                    var num = parseInt(this.cNum) - (this.leftRightUnit || 100);
+                    if (num < 100) {
+                        this.noNReduce = true;
+                        this.cNum = 0;
+                    } else {
+                        this.cNum = num;
+                    }
+                },
+                // 递增数量
+                addNum: function() {
+                    this.noNReduce = false;
+                    var num = parseInt(this.cNum / 100) * 100 + (this.leftRightUnit || 100);
+                    this.cNum = num;
+                },
+                parseUrlSearch() {
+                    if (location.search) {
+                        let searchStr = decodeURIComponent(location.search).slice(1);
+                        let searchItems = searchStr.split('&');
+                        let searchObj = {};
+                        searchItems.forEach((v) => {
+                            searchObj[v.split('=')[0]] = v.split('=')[1]
+                        })
+                        this.ccode = searchObj['ccode'];
+                        this.cname = searchObj['cname'];
+                        this.faccount_id = searchObj['faccount_id'];
+                        this.fname = searchObj['fname'];
+                        this.source = searchObj['source'];
+                        this.cash_count = searchObj['cash_count'];
+                        document.title = (this.source == 1 ? '公-' : '私-') + this.cname + '/' + this.ccode;
+                    }
+                },
+                getMaxNumber() {
+                    var vm = this,
+                        url = '/api/stock/bscount',
+                        opt = {
+                            ccode: this.ccode,
+                            faccount_id: this.faccount_id,
+                            price: parseFloat(this.cPrice) ? parseFloat(this.cPrice).toFixed(2) : 0,
+                            source: this.source
+                        };
+
+                    if (opt.ccode && opt.faccount_id && opt.price) {
+                        API.METHODS.getData(url, opt, function(res) {
+                            if (res.status == 0) {
+                                vm.mbcount = res.data.mbcount;
+                                vm.mscount = res.data.mscount;
+                                vm.getPosition();
+                            } else {
+                                ACTION.showToast({
+                                    msg: res.msg
+                                })
+                            }
+                        })
+                    }
+                },
+                changeTxtSize(price) {
+                    let _this = this;
+                    if (parseFloat(price)) {
+                        _this.cPrice = parseFloat(price).toFixed(2);
+                        _this.makeTxtBig = true;
+                        setTimeout(function() {
+                            _this.makeTxtBig = false
+                        }, 300)
+                    } else {
+                        _this.cPrice = '0.00'
+                    }
+                },
+                handleTradeBtn(param) {
+                    var showTradeDialog = this.settings.showTradeDialog;
+                    var self = this;
+                    this.buyType = param;
+                    this.showSettingDialog = false;
+                    if (showTradeDialog == 'no') {
+                        this.buy();
+                    } else {
+                        this.openComfirmDialog();
+                    }
+                },
+                openComfirmDialog() {
+                    let self = this;
+                    self.showComfirmDialog = true;
+                },
+                checkBuyInfo() {
+                    if (this.cPrice > this.yesterdayPriceUp) return '委托价格不得超过涨停价';
+                    if (this.cPrice < this.yesterdayPriceDown) return '委托价格不得低于跌停价';
+                    if (this.isPost) {
+                        return '您的操作过于频繁!'
+                    };
+                    // 当委托交易为卖出时
+                    // if(param == 1) {
+                    // 	if(this.cNum > this.mscount) return '超出最大可卖数量!';
+                    // 	// 最大可卖数为100的整数，委托卖出不为100的整数
+                    // 	if(this.cNum % 100 != 0 && this.mscount % 100 == 0) return '委托卖出数量应为100的整数倍';
+                    // 	// 当最大可卖数存在碎股
+                    // 	if(this.mscount % 100 != 0) {
+                    // 		// 如果委托数既不等于最大可卖数，委托数也不为100的整数倍，委托数也不等于碎股数量则提示错误
+                    // 		if(this.cNum != this.mscount && this.cNum % 100 != 0 && this.cNum != (this.mscount % 100)) return '请将碎股全部委托处理!'
+                    // 	}
+                    // }
+                    return '';
+                },
+                buy() {
+                    var msg = this.checkBuyInfo();
+                    if (msg) {
+                        this.showComfirmDialog = false;
+                        ACTION.showToast({
+                            msg: msg
+                        });
+                        return
+                    }
+
+                    this.isPost = true;
+                    var url = '/api/stock/order',
+                        opt = {
+                            ccode: this.ccode,
+                            price: this.cPrice,
+                            quantity: this.cNum,
+                            tside: this.buyType,
+                            faccount_id: this.faccount_id,
+                            source: this.source
+                        };
+                    this.showComfirmDialog = false;
+                    this.showSettingDialog = false;
+                    var vm = this;
+
+                    API.METHODS.getData(url, opt, function(res) {
+                        if (res.status == 0) {
+                            ACTION.showToast({
+                                msg: res.msg || '下单成功'
+                            });
+                            vm.getStockSetting();
+                            // vm.cNum = vm.defaultUnit;
+                        } else {
+                            ACTION.showToast({
+                                msg: res.msg || '下单失败'
+                            });
+                        }
+                        vm.isPost = false;
+                        vm.getMaxNumber()
+                    }, 'POST')
+                },
+                handleKeyup() {
+                    var vm = this;
+                    var stock = STORAGE.getItem(this.ccode) || {};
+                    var updownUnit = (stock.updownUnit % 1 > 0) ? stock.updownUnit : (stock.updownUnit / 100);
+                    var prePrice = this.cPrice;
+                    this.action = null;
+                    switch (this.keyCode) {
+                        case 38:
+                            // 点击向上箭头，委托价格增加一个单位
+                            this.cPrice = (parseFloat(this.cPrice) + parseFloat(updownUnit || 0.01)).toFixed(2);
+                            break;
+                        case 40:
+                            // 点击向下箭头，委托价格减少一个单位，最小价格为0.01
+                            var cPrice = parseFloat(this.cPrice) - parseFloat(updownUnit || 0.01);
+                            this.cPrice = cPrice <= 0 ? 0.01 : cPrice.toFixed(2);
+                            break;
+                        case 37:
+                            // 点击键盘左键，减少一个股数单位
+                            this.cNum = (this.cNum - this.leftRightUnit) <= 0 ? this.cNum : (this.cNum - this.leftRightUnit);
+                            break;
+                        case 39:
+                            // 点击键盘右键，增加一个股数单位
+                            this.cNum = parseInt(this.cNum) + parseInt(this.leftRightUnit);
+                            break;
+                        case 27:
+                            if (this.showSettingDialog) {
+                                this.cancelSetting()
+                            } else if (this.showComfirmDialog) {
+                                this.showComfirmDialog = false;
+                            } else {
+                                if (this.operator) {
+                                    window.resizeBy(0, -35);
+                                }
+                                this.operator = null;
+                            }
+                            break;
+                        case 13:
+                            if (this.showSettingDialog) {
+                                this.confirmSetting();
+                            } else if (this.showComfirmDialog) {
+                                this.buy();
+                            } else {
+                                this.operator ? this.handleTradeBtn(this.operator == 'B' ? 0 : 1) : null;
+                            }
+                            break;
+                        default:
+                            Object.keys(this.keyboard).forEach((v, i) => {
+                                if (this.keyboard[v].key === this.keyCode) {
+                                    this.action = this.action || v;
+                                    // this.cNum = this.defaultUnit;
+                                }
+                            })
+                            break;
+                    }
+                    if (this.action && this.action.indexOf('B') == 0) {
+                        this.isInitCNum = true;
+                        this.operator ? null : window.resizeBy(0, 35);
+                        this.operator = 'B';
+                        this.cPrice = (this.keyboard[this.action]['type'] == 'B' ? this.s_pLevels[0][this.keyboard[this.action]['index']] : this.s_mLevels[0][this.keyboard[this.action]['index']]) || this.s_info.curPrice;
+                        // 当价格没有发生变化的时候，由于不能通过检测价格来触发初始化委托数量，通过调用函数强制初始化委托数量
+                        if (this.cPrice == prePrice) {
+                            this.getMaxNumber();
+                        }
+                    } else if (this.action && this.action.indexOf('S') == 0) {
+                        this.isInitCNum = true;
+                        this.operator ? null : window.resizeBy(0, 35);
+                        this.operator = 'S';
+                        this.cPrice = (this.keyboard[this.action]['type'] == 'B' ? this.s_pLevels[0][this.keyboard[this.action]['index']] : this.s_mLevels[0][this.keyboard[this.action]['index']]) || this.s_info.curPrice;
+                        // 当价格没有发生变化的时候，由于不能通过检测价格来触发初始化委托数量，通过调用函数强制初始化委托数量
+                        if (this.cPrice == prePrice) {
+                            this.getMaxNumber();
+                        }
+                    }
+                },
+                openSetting: function() {
+                    this.showSettingDialog = true;
+                    this.showComfirmDialog = false;
+                    this.getStockSetting()
+                },
+                getStockSetting: function() {
+                    // 对老版本的数据做了兼容处理，在老版本中，价格以元为单位，本版本中以分为单位
+                    var stock = STORAGE.getItem(this.ccode) || {};
+                    var updownUnit = (stock.updownUnit % 1 > 0) ? stock.updownUnit * 100 : stock.updownUnit;
+                    this.leftRightUnit = stock.leftRightUnit ? parseInt(stock.leftRightUnit) : 100;
+                    this.updownUnit = (updownUnit && parseInt(updownUnit) > 1) ? parseInt(updownUnit) : 1;
+                    this.defaultUnit = stock.defaultUnit ? parseInt(stock.defaultUnit) : 1000;
+                },
+                getGlobalSetting: function() {
+                    var settings = STORAGE.getItem('settings');
+                    settings = settings ? JSON.parse(settings) : {};
+                    this.settings = settings;
+                    this.layout = settings.layout || 1;
+                    this.level = settings.level || 1;
+                    this.showDeal = this.settings.level == 2 ? true : false;
+                },
+                cancelSetting: function() {
+                    this.showSettingDialog = false;
+                    this.getStockSetting();
+                },
+                confirmSetting: function() {
+                    let vm = this,
+                        msg;
+                    if (this.defaultUnit % 100 != 0 || this.defaultUnit < 100) {
+                        msg = '默认委托数量必须为100的整数倍,最小委托数量为100股';
+                    } else if (this.leftRightUnit % 100 != 0 || this.leftRightUnit < 100) {
+                        msg = '左右键股数调整必须为100的整数倍，最小调整股数为100股';
+                    } else if (parseFloat(this.updownUnit) < 1 || (this.updownUnit % 1 > 0)) {
+                        msg = '上下键价格调整必须为整数，最小调整价格为1分';
+                    } else {
+                        msg = '';
+                    }
+
+                    if (msg) {
+                        ACTION.showToast({
+                            msg: msg
+                        });
+                        return;
+                    }
+
+                    vm.showSettingDialog = false;
+                    STORAGE.setItem(vm.ccode, {
+                        leftRightUnit: vm.leftRightUnit,
+                        defaultUnit: vm.defaultUnit,
+                        updownUnit: vm.updownUnit
+                    });
+                    vm.getStockSetting();
+                },
+                handleInfor: function(param) {
+                    switch (param) {
+                        case 'showInfor':
+                            window.resizeBy(0, this.showInfor ? -40 : 40);
+                            break;
+                        case 'showDeal':
+                            window.resizeBy(this.showDeal ? -180 : 180, 0);
+                            break;
+                    }
+                    setTimeout(() => {
+                        this[param] = !this[param];
+                    }, 0)
+                },
+                // 初始化弹窗尺寸
+                initSize: function() {
+                    // this.getGlobalSetting();
+                    var height, width;
+                    var operatorHeight = this.operator ? 35 : 0; // 根据是否选定了买卖方向来决定变更布局的时候是否加上按钮容器的高度
+                    var inforHeight = this.showInfor ? 40 : 0; // 根据showInfor是否展开决定变更布局的时候是否加上该高度
+                    this.showDeal = true;
+                    if (this.settings.level == 2) { // 设置为level2行情
+                        if (this.settings.layout == 2) { // 左右布局
+                            width = 430;
+                            height = 285;
+                        } else { // 上下布局
+                            width = 430;
+                            height = 465;
+                        }
+                    } else { // 设置为level1行情或者尚未设置
+                        if (this.settings.layout == 2) { // 左右布局
+                            width = 250;
+                            height = 195;
+                        } else { // 上下布局
+                            width = 250;
+                            height = 285;
+                        }
+                    }
+                    height = height + operatorHeight + inforHeight;
+                    window.resizeTo(width + window.outerWidth - window.innerWidth, window.outerHeight - window.innerHeight + height);
+                },
+                initcNum: function() {
+                    // this.getGlobalSetting();
+                    this.isInitCNum = false;
+                    this.getStockSetting();
+                    var canTrade; // 设置最大可买卖数量，根据交易方向的不同分别为最大可买和最大可卖
+                    var defaultUnit;
+
+                    if (this.operator == 'S') {
+                        canTrade = this.mscount;
+                        if (this.settings.entrustAccount == 'positionUnit') {
+                            if (parseInt(this.position) > 0) {
+                                defaultUnit = this.position
+                            } else if (parseInt(this.position) < 0) {
+                                defaultUnit = this.defaultUnit || 1000;
+                            } else {
+                                this.cNum = this.defaultUnit || 1000;
+                                return;
+                            }
+                        } else {
+                            defaultUnit = this.defaultUnit || 1000;
+                        }
+                    } else if (this.operator == 'B') {
+                        canTrade = this.mbcount;
+                        if (this.settings.entrustAccount == 'positionUnit') {
+                            if (parseInt(this.position) > 0) {
+                                defaultUnit = this.defaultUnit || 1000;
+                            } else if (parseInt(this.position) < 0) {
+                                defaultUnit = Math.abs(this.position)
+                            } else {
+                                this.cNum = this.defaultUnit || 1000;
+                                return;
+                            }
+                        } else {
+                            defaultUnit = this.defaultUnit || 1000;
+                        }
+                    } else {
+                        canTrade = 0
+                    }
+
+                    if (!this.operator) {
+                        this.cNum = this.defaultUnit || 1000;
+                    } else {
+                        this.cNum = Math.min(defaultUnit, canTrade);
+                    }
+                },
+                getPosition: function() { // 获取股票头寸
+                    var url = '/api/query/cash',
+                        vm = this;
+                    API.METHODS.getData(url, {}, function(res) {
+                        if (res.status == 0 && res.data.list.length > 0) {
+                            let list = res.data.list;
+                            for (let i = 0; i < list.length; i++) {
+                                if (vm.faccount_id == list[i].faccount_id && vm.ccode == list[i].ccode && vm.source == list[i].source) {
+                                    vm.position = list[i].cash_count;
+                                    break;
+                                }
+                            }
+                        } else {
+                            vm.position = 0;
+                        }
+                        vm.isInitCNum ? vm.initcNum() : null;
+                    })
+                }
+            },
+            created: function() {
+                this.getGlobalSetting();
+                let keyboard = STORAGE.getItem('keyboard');
+                if (keyboard) {
+                    this.keyboard = JSON.parse(keyboard);
+                }
+            },
+            mounted: function() {
+                var vm = this;
+                this.parseUrlSearch();
+                this.getStockSetting();
+                if (this.ccode) {
+                    this.initData();
+                }
+                // setTimeout(function() {
+                //     vm.getPosition()
+                // }, 200)
+                window.addEventListener('storage', (e) => {
+                    if (e.key == 'keyboard') {
+                        vm.keyboard = JSON.parse(STORAGE.getItem('keyboard'));
+                    } else if (e.key == 'user' && !localStorage.getItem('user')) {
+                        window.close()
+                    } else if (e.key == 'settings') {
+                        this.getGlobalSetting();
+                        this.initSize();
+                        vm.initData()
+                    }
+                })
+
+                window.addEventListener('keyup', function(e) {
+                    if (vm.showSettingDialog || vm.showComfirmDialog) {
+                        // 当弹出设置框或确认框时，除了esc和enter键，其他键盘需要禁用
+                        if (e.keyCode == 13 || e.keyCode == 27) {
+                            vm.keyCode = e.keyCode;
+                            vm.handleKeyup();
+                        } else {
+                            return
+                        }
+                    } else {
+                        vm.keyCode = e.keyCode;
+                        vm.handleKeyup();
+                    }
+                })
+
+                this.initSize();
+                window.onbeforeunload = function() {
+                    var windowManage = window.opener ? window.opener.window.windowManage : window.top.window.windowManage;
+                    windowManage[vm.ccode + '-' + vm.faccount_id + '-' + vm.source] = null;
+
+                }
+            }
+
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>未平仓位</title>
+    <script type="text/javascript" src="/resources/js/super.js"></script>
+</head>
+
+<body>
+    <div id="" style="height:100%;width:100%;">
+        <div class="title-bar"></div>
+        <table id="uncovered_position_table" fitColumns="true" fit="true"></table>
+        <!--<div id="uncovered_position_toolbar" class="clearfix color-bg" style="padding:8px 5px;text-align:right;">-->
+        <!--<div class="fr">-->
+        <!--<span style="color: #9492B0;padding-right: 100px">涨停价委买，跌停价委卖</span>-->
+        <!--<a href="#" class="btn-red"  onclick="Entrust.showClosePositionDialog(1)">平多仓</a>-->
+        <!--<a href="#" class="btn-green"  onclick="Entrust.showClosePositionDialog(2)">平空仓</a>-->
+        <!--</div>-->
+        <!--</div>-->
+    </div>
+    <div id="win_uncovered_position1" class="easyui-window" title="平仓确认" style="width:300px;" data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+	 minimizable:false,maximizable:false,closed:true">
+        <p style="text-align: center">确定平全部<span style="color: red">多头</span>仓位吗？</p>
+        <div class="dialog_footer">
+            <a class="btn-border btn-no" data-options="iconCls:'icon-cancel'" style="width:90px">取消</a>
+            <a class="btn-red btn-ok" data-options="iconCls:'icon-ok'" style="width:90px;margin-left: 20px">确定</a>
+        </div>
+    </div>
+    <div id="win_uncovered_position2" class="easyui-window" title="平仓确认" style="width:300px;" data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+	 minimizable:false,maximizable:false,closed:true">
+        <p style="text-align: center">确定平全部<span style="color: green">空头</span>仓位吗？</p>
+        <div class="dialog_footer">
+            <a class="btn-border btn-no" data-options="iconCls:'icon-cancel'" style="width:90px">取消</a>
+            <a class="btn-red btn-ok" data-options="iconCls:'icon-ok'" style="width:90px;margin-left: 20px">确定</a>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    var UncoveredPosition = {
+        context: this,
+        init: function() {
+            this.initTableData();
+            this.startTimer();
+        },
+        initTableData: function() {
+            var optionData = {
+                url: '/api/query/cash',
+                pagination: false,
+                pageSize: 30,
+                scrollbarSize: 0,
+                border: false,
+                method: 'get',
+                loadMsg: '',
+                autoRowHeight: false,
+                singleSelect: true,
+                remoteSort: false,
+                striped: true,
+                fitColumns: true,
+                scrollbarSize: 0,
+                columns: [
+                    [{
+                        field: 'ccode',
+                        width: 80,
+                        align: 'center',
+                        title: '股票代码',
+                        sortable: true
+                    }, {
+                        field: 'cname',
+                        width: 80,
+                        align: 'center',
+                        title: '股票名称',
+                        sortable: true
+                    }, {
+                        field: 'fname',
+                        width: 100,
+                        align: 'center',
+                        title: '资金账户',
+                        sortable: true
+                    }, {
+                        field: 'source',
+                        width: 100,
+                        align: 'center',
+                        title: '股票来源',
+                        sortable: true,
+                        formatter: function(val) {
+                            return val == 0 ? '私有券池' : '公共券池'
+                        },
+                    }, {
+                        field: 'cash_count',
+                        width: 70,
+                        align: 'center',
+                        title: '头寸股数',
+                        sortable: true,
+                        formatter: API.METHODS.colorNumberFormatterInt
+                    }, {
+                        field: 'cash_price',
+                        width: 60,
+                        align: 'center',
+                        title: '头寸成本',
+                        sortable: true,
+                        sorter: function(a, b) {
+                            return parseFloat(a) - parseFloat(b);
+                        }
+                    }, {
+                        field: 'float_profit',
+                        width: 80,
+                        halign: 'center',
+                        align: 'right',
+                        title: '浮动盈亏',
+                        sortable: true,
+                        sorter: function(a, b) {
+                            return parseFloat(a) - parseFloat(b);
+                        },
+                        formatter: API.METHODS.colorNumberFormatter
+                    }, ]
+                ],
+            }
+            API.METHODS.loadData('#uncovered_position_table', optionData);
+        },
+        showClosePositionDialog: function(type) {
+            EUtils.openWindow('#win_uncovered_position' + type, function() {
+                // let url='/api/stock/cancel'
+                // API.METHODS.getData(url,{},function (res) {
+                //     if(res.status==0){
+                //         EUtils.toast(res['msg'])
+                //     }else{
+                //
+                //     }
+                // },'post')
+            })
+        },
+        getStatusText(status) {
+            switch (status) {
+                case 'unsend':
+                    return '未报';
+                case 'tosend':
+                    return '待报';
+                case 'tocancel':
+                    return '待撤';
+                case 'sent':
+                    return '已报';
+                case 'sending':
+                    return '正报';
+                case 'canceling':
+                    return '正撤';
+                case 'canceled':
+                    return '已撤';
+                case 'pcanceled':
+                    return '部撤';
+                case 'dealt':
+                    return '已成';
+                case 'pdealt':
+                    return '部成';
+                case 'cexpired':
+                    return '撤废';
+                case 'expired':
+                    return '废单';
+                case 'pexpired':
+                    return '部废';
+                default:
+                    return '--';
+            }
+        },
+        startTimer: function() {
+            setInterval(function() {
+                $('#uncovered_position_table').datagrid('reload')
+            }, 3000)
+        }
+    }
+    UncoveredPosition.init();
+</script>
+
+</html>

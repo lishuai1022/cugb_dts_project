@@ -1,0 +1,135 @@
+<div style="height:100%;width:100%;" id="trader_manage" class="trader_manage clearfix">
+    <div class="" style="width:100%;height:100%;border-right:1px solid #d4d4d4;">
+        <table class="trader_manage_table"  title="" fitcolumns="true" style="width:100%;height:100%;"></table>
+        <div id="trader_manage_top_bar" class="clearfix" style="padding:5px 5px;text-align:right;">
+            <div class="fl">
+                <a href="javascript:;" class="easyui-linkbutton" @click="showResetPwd()" iconCls="icon-edit">重置密码</a>
+            </div>
+            <div class="fr">
+                交易权限:
+                <input class="easyui-combobox status" style="width: 110px">
+                <input class="easyui-textbox keyword" data-options="prompt:'交易员名称'" type="text" style="width:130px">
+                <a href="javascript:;" class="easyui-linkbutton" @click="search" iconCls="icon-search">搜索</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重置密码-弹窗 -->
+
+    <div id="win_trader_manage_reset_pwd" class="easyui-window" title="重置密码" style="width:300px;"
+         data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+	 minimizable:false,maximizable:false,closed:true">
+        <form class="easyui-form" method="post" >
+            <table cellspacing="10" width="100%" style="table-layout: fixed">
+                <tr>
+                    <td class="reset-input-disable">
+                        <input class="easyui-textbox"  name="name" style="width:100%" data-options="label:'交易员名称:',labelWidth:90,disabled:true">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input class="easyui-textbox"  name="password" style="width:100%" data-options="label:'新密码:',labelWidth:90,required:true,validType:'length[6,20]'">
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <div class="dialog_footer">
+            <a class="easyui-linkbutton btn-ok" data-options="iconCls:'icon-ok'" style="width:90px" >确定</a>
+            <a class="easyui-linkbutton btn-no" data-options="iconCls:'icon-cancel'" style="width:90px">取消</a>
+        </div>
+    </div>
+    
+</div>
+<script type="text/javascript">
+!function(){
+    new Vue({
+        el:'#trader_manage',
+        data:{
+            id:null
+        },
+        mounted:function(){
+            this.initSelect('#trader_manage_top_bar .status',
+                [
+                    {id:'normal',name:'正常'},
+                    {id:'olimit',name:'禁开仓'},
+                    {id:'disable',name:'停用'},
+                ],
+                {
+                    firstData:{id:'',name:'全部'},
+                    multiple:true
+                }
+            );
+            this.initTableData();
+        },
+        methods:{
+            initTableData:function(){
+                var optionData= {
+                    url: '/api/trader/list',
+                    pagination: true,
+                    pageSize:30,
+                    border:false,
+                    method:'get',
+                    toolbar:'#trader_manage_top_bar',
+                    autoRowHeight:false,
+                    singleSelect:true,
+                    striped:true,
+                    fitColumns:true,
+                    scrollbarSize:0,
+                    columns:[[
+                        {field:'name',width:130,align:'center',title:'交易员名称',sortable:true},
+                        {field:'account',width:130,align:'center',title:'交易员账号',sortable:true},
+                        {field:'distribution_mv',width:110,align:'right',halign:'center',title:'已分配市值',sortable:true,formatter:API.METHODS.numberFormatter},
+                        {field:'status',width:90,align:'center',title:'交易权限',sortable:true},
+                        {field:'opening_limit',width:110,align:'right',halign:'center',title:'开仓限额',sortable:true,formatter:API.METHODS.numberFormatter},
+                        {field:'transit_limit',width:110,align:'right',halign:'center',title:'在途限额',sortable:true,formatter:API.METHODS.numberFormatter},
+                        {field:'loss_limit',width:110,align:'right',halign:'center',title:'盈亏限额',sortable:true,formatter:API.METHODS.numberFormatter},
+                        {field:'pexpired_flag_str',width:110,align:'center',title:'超限委托',sortable:true},
+                    ]],
+                    onBeforeLoad:function (param) {
+                        param.status = $('#trader_manage_top_bar .status').val();
+                        param.keyword = $('#trader_manage_top_bar .keyword').val();
+                    }
+                };
+                API.METHODS.loadData('#trader_manage .trader_manage_table',optionData);
+            },
+            search:function(){//搜索
+                $('#trader_manage .trader_manage_table').datagrid('gotoPage', 1);
+            },
+            showResetPwd:function(){//显示重置密码弹框
+                var rowData = this.getTableSelected('#trader_manage .trader_manage_table');
+                if(rowData){//已选择一行
+                    var vm = this
+                    vm.openWindow('#win_trader_manage_reset_pwd' ,function(){
+                        $.messager.progress();	// display the progress bar
+                        vm.submitForm('#win_trader_manage_reset_pwd .easyui-form', {
+                            url: '/api/trader/edit',
+                            onSubmit: function(p){
+                                p.trader_id = rowData.id;
+                                var isValid = $(this).form('validate');
+                                if (!isValid){
+                                    $.messager.progress('close');
+                                }
+                                return isValid;
+                            },
+                            success: function(res){
+                                $.messager.progress('close');
+                                if(res.status==0){
+                                    $('#win_trader_manage_reset_pwd').window('close');
+                                    vm.toast(res['msg'])
+                                }else{
+                                    $.messager.alert('提示',res['msg']);
+                                }
+
+                            }
+                        });
+                    });
+                    $('#win_trader_manage_reset_pwd .easyui-form').form('load',rowData)
+                }else{
+                    $.messager.alert('提示','请先选中一行','error');
+                }
+
+            },
+        }
+    })
+}();
+</script>

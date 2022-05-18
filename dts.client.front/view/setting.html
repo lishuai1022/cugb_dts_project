@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>设置</title>
+    <link rel="stylesheet" type="text/css" href="/resources/css/static.css">
+    <script src="/resources/js/super.js"></script>
+    <!-- <link rel="stylesheet" type="text/css" href="/resources/css/main.css?t=0127"> -->
+    <style>
+        body {
+            background-color: rgba(66, 64, 87, 1);
+        }
+        
+        .modal-bg {
+            position: relative;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(66, 64, 87, 1);
+        }
+        
+        .modal {
+            position: static;
+            background-color: rgba(66, 64, 87, 1);
+            overflow: visible
+        }
+        
+        .setting-tabs {
+            display: block;
+            height: 40px;
+            border-bottom: 1px solid rgba(95, 92, 121, 1);
+        }
+        
+        .setting-tabs li {
+            background: transparent;
+            float: left;
+            width: 80px;
+            font-size: 13px;
+            color: #fff;
+            line-height: 40px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .setting-tabs li.cur {
+            background: rgba(255, 76, 76, 1)
+        }
+        
+        .text-white {
+            color: #fff !important;
+        }
+        
+        .modal-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #7f7ca8;
+            height: 24px;
+            line-height: 24px;
+        }
+        
+        .fl {
+            float: left
+        }
+        
+        .fr {
+            float: right;
+            padding-left: 10px;
+        }
+        
+        .modal-footer {
+            box-sizing: border-box;
+            border-top: 1px solid rgba(95, 92, 121, 1);
+            text-align: center;
+            padding-top: 10px;
+        }
+        
+        .btn-save {
+            position: relative;
+            display: inline-block;
+            box-sizing: border-box;
+            background: rgba(255, 76, 76, 1);
+            width: 70px;
+            height: 32px;
+            font-size: 12px;
+            color: #fff;
+            text-align: center;
+            line-height: 32px;
+            cursor: pointer;
+            top: -1px;
+        }
+        
+        .btn-cancel {
+            display: inline-block;
+            box-sizing: border-box;
+            background: transparent;
+            width: 70px;
+            height: 32px;
+            font-size: 12px;
+            color: #fff;
+            text-align: center;
+            line-height: 32px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-right: 20px;
+        }
+        
+        .modal-body {
+            padding: 10px;
+        }
+        
+        .modal-cell,
+        .modal-footer-cell {
+            position: relative;
+            box-sizing: border-box;
+            height: 24px;
+            line-height: 24px;
+            width: 50%;
+            float: left;
+            margin-top: 5px;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .modal-footer-cell {
+            width: 100%;
+            margin-top: 0;
+        }
+        
+        .modal-cell label,
+        .modal-footer-cell label {
+            float: left;
+            box-sizing: border-box;
+            text-align: left;
+            height: 24px;
+            line-height: 24px;
+            color: #7f7ca8;
+            font-size: 12px;
+        }
+        
+        .modal-footer-cell label {
+            float: left;
+            width: 80px;
+            line-height: 24px;
+            color: #fff;
+        }
+        
+        .modal-cell .modal-inputfield {
+            position: relative;
+            box-sizing: border-box;
+            float: left;
+            height: 24px;
+            margin-left: 10px;
+            /* height: 40px; */
+        }
+        
+        .modal-cell .modal-inputfield:after {
+            position: absolute;
+            right: 7px;
+            top: 7px;
+            content: '';
+            display: block;
+            background: url('/resources/images/icon_arrow_updown.png') no-repeat 50% 50%;
+            width: 6px;
+            height: 9px;
+            background-size: contain;
+        }
+        
+        .modal-cell:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+        
+        .modal-inputfield input {
+            position: absolute;
+            box-sizing: border-box;
+            left: 0;
+            width: 100%;
+            height: 24px;
+            line-height: 24px;
+            padding-left: 10px;
+            padding-right: 10px;
+            font-size: 12px;
+            cursor: pointer;
+            background: #595677;
+            border: 1px solid #5f5c79;
+            color: #7f7ca8;
+        }
+        
+        .modal-inputfield input.cur {
+            border: 1px solid #595677;
+            color: #7f7ca8;
+        }
+        
+        .icon-close {
+            position: absolute;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: url('/assets/images/transferUploadCancel.png') no-repeat 50% 50%;
+            background-size: contain;
+            cursor: pointer;
+            right: 10px;
+            top: 10px;
+        }
+        
+        .modal-dropdown {
+            box-sizing: border-box;
+            position: absolute;
+            z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            left: 0;
+            top: 100%;
+            right: 0;
+            max-height: 100px;
+            overflow-y: scroll;
+            background-color: #595677;
+        }
+        
+        .modal-dropdown div {
+            background-color: #595677;
+            color: #7f7ca8;
+            line-height: 24px;
+            height: 24px;
+            padding-left: 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .modal-dropdown div:hover {
+            background: #625266;
+        }
+        
+        .radio-field {
+            display: inline-block;
+            width: 110px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="keyboardSetting">
+        <!-- <div class="title-bar"></div> -->
+        <div :style="{display: 'none'}" style="text-align: center;">
+            <div class="loader-01"></div>
+        </div>
+        <div class="modal-bg" style="display: none;" :style="{display: 'block'}" @click.stop="showDropdown=false,selected=null">
+            <ul class="setting-tabs">
+                <li :class="{'cur': tab == 'shortcut'}" @click="tap('shortcut')">快捷键设置</li>
+                <li :class="{'cur': tab == 'transaction'}" @click="tap('transaction')">交易设置</li>
+                <li :class="{'cur': tab == 'layout'}" @click="tap('layout')">布局设置</li>
+            </ul>
+            <div class="modal" id="shortcut" v-if="tab == 'shortcut'">
+                <div class="modal-body clearfix">
+                    <div class="modal-cell">
+                        <h2 class="modal-title">买入快捷键设置</h2>
+                    </div>
+                    <div class="modal-cell" style="padding-left:10px">
+                        <h2 class="modal-title">卖出快捷键设置</h2>
+                    </div>
+                    <div class="modal-cell" v-for="(v, i) in Object.keys(keyboard)" :class="{'fl':i%2==0,'fr':i%2==1}">
+                        <label>
+                        {{ keyboard[v].label }}
+                        <!-- {{ String.fromCharCode(keyboard[v].key) }} -->
+                        </label>
+                        <div class="modal-inputfield" style="width: 70px">
+                            <input type="text" :class="{'text-white':(keyboard[v]&&keyboard[v].name)}" readonly @focus.stop="selected=v,showPriceDropdown=true,showDropdown=false" @click.stop="showPriceDropdown=true,showDropdown=false" :value="(keyboard&&keyboard[v]&&keyboard[v].name)?keyboard[v].name:'未设置'"
+                                placeholder="未设置">
+                            <div class="modal-dropdown" v-if="selected==v&&showPriceDropdown">
+                                <div v-for="o in priceList" @click.stop="handleSelectPrice(v, o)" :class="{'text-white':o!==null}">
+                                    {{ o.name }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-inputfield" style="width: 70px">
+                            <input type="text" readonly @keyup="handler" :class="{'text-white':keyboard[v].key}" @focus.stop="selected=v,showDropdown=true,showPriceDropdown=false" @click.stop="showDropdown=true,showPriceDropdown=false" :value="keyboard[v].key?String.fromCharCode(keyboard[v].key):'未设置'"
+                                placeholder="未设置">
+                            <div class="modal-dropdown" v-if="selected==v&&showDropdown">
+                                <div v-for="key in keys" @click.stop="handlerClick(key)">
+                                    {{ key?String.fromCharCode(key):'未设置' }}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-cell text-red mt5" style="width: 100%; text-align: center">快捷键可以使用a-z,不区分大小写</div>
+                </div>
+            </div>
+            <div class="modal" id="transaction" v-if="tab == 'transaction'">
+                <div class="modal-body clearfix">
+                    <div class="modal-footer-cell">
+                        <label>委托数量</label>
+                        <div class="radio-field">
+                            <input type="radio" v-model="entrustAccount" value="defaultUnit">&nbsp;&nbsp;默认委托数量
+                        </div>
+                        <div class="radio-field">
+                            <input type="radio" v-model="entrustAccount" value="positionUnit">&nbsp;&nbsp;头寸股数
+                        </div>
+                    </div>
+                    <div class="modal-footer-cell">
+                        <label>委托确认</label>
+                        <div class="radio-field">
+                            <input type="radio" v-model="showTradeDialog" value="yes">&nbsp;&nbsp;是</div>
+                        <div class="radio-field">
+                            <input type="radio" v-model="showTradeDialog" value="no">&nbsp;&nbsp;否
+                        </div>
+                    </div>
+                    <div class="modal-footer-cell">
+                        <label>撤单确认</label>
+                        <div class="radio-field">
+                            <input type="radio" v-model="showRetreatDialog" value="yes">&nbsp;&nbsp;是</div>
+                        <div class="radio-field">
+                            <input type="radio" v-model="showRetreatDialog" value="no">&nbsp;&nbsp;否
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="layout" v-if="tab == 'layout'">
+                <div class="modal-body clearfix">
+                    <div class="modal-footer-cell">
+                        <label>行情源</label>
+                        <div class="radio-field" style="width: 80px">
+                            <input type="radio" v-model="level" value="1">&nbsp;&nbsp;Level1
+                        </div>
+                        <div class="radio-field"><input type="radio" v-model="level" value="2">&nbsp;&nbsp;Level2</div>
+                    </div>
+                    <div class="modal-footer-cell">
+                        <label>盘口布局</label>
+                        <div class="radio-field" style="width: 80px">
+                            <input type="radio" v-model="layout" value="1">&nbsp;&nbsp;上下
+                        </div>
+                        <div class="radio-field">
+                            <input type="radio" v-model="layout" value="2">&nbsp;&nbsp;左右
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="btn-cancel" @click="hideKeyboard">取 消</div>
+                <div class="btn-save" @click="save">保 存</div>
+            </div>
+        </div>
+        </duliv>
+
+        <script type="text/javascript" src="/resources/js//vue.min.js"></script>
+        <script type="text/javascript" src="/resources/js/jquery.js"></script>
+        <script type="text/javascript" src="/resources/js/util.js"></script>
+        <script type="text/javascript">
+            new Vue({
+                el: '#keyboardSetting',
+                data: {
+                    selected: null,
+                    keyboard: null,
+                    tab: 'shortcut',
+                    defaultKeyboard: null,
+                    showDropdown: false,
+                    showPriceDropdown: false,
+                    priceList: [{
+                            name: '买十价',
+                            index: 9,
+                            type: 'B'
+                        }, {
+                            name: '买九价',
+                            index: 8,
+                            type: 'B'
+                        }, {
+                            name: '买八价',
+                            index: 7,
+                            type: 'B'
+                        }, {
+                            name: '买七价',
+                            index: 6,
+                            type: 'B'
+                        }, {
+                            name: '买六价',
+                            index: 5,
+                            type: 'B'
+                        }, {
+                            name: '买五价',
+                            index: 4,
+                            type: 'B'
+                        }, {
+                            name: '买四价',
+                            index: 3,
+                            type: 'B'
+                        }, {
+                            name: '买三价',
+                            index: 2,
+                            type: 'B'
+                        }, {
+                            name: '买二价',
+                            index: 1,
+                            type: 'B'
+                        }, {
+                            name: '买一价',
+                            index: 0,
+                            type: 'B'
+                        },
+
+                        {
+                            name: '卖一价',
+                            index: 0,
+                            type: 'S'
+                        }, {
+                            name: '卖二价',
+                            index: 1,
+                            type: 'S'
+                        }, {
+                            name: '卖三价',
+                            index: 2,
+                            type: 'S'
+                        }, {
+                            name: '卖四价',
+                            index: 3,
+                            type: 'S'
+                        }, {
+                            name: '卖五价',
+                            index: 4,
+                            type: 'S'
+                        }, {
+                            name: '卖六价',
+                            index: 5,
+                            type: 'S'
+                        }, {
+                            name: '卖七价',
+                            index: 6,
+                            type: 'S'
+                        }, {
+                            name: '卖八价',
+                            index: 7,
+                            type: 'S'
+                        }, {
+                            name: '卖九价',
+                            index: 8,
+                            type: 'S'
+                        }, {
+                            name: '卖十价',
+                            index: 9,
+                            type: 'S'
+                        },
+                    ],
+                    keys: [null, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90],
+                    default: {
+                        'B1': {
+                            key: null,
+                            label: '买入1',
+                            type: 'S',
+                            name: '卖一价',
+                            index: 0
+                        },
+                        'S1': {
+                            key: null,
+                            label: '卖出1',
+                            type: 'B',
+                            name: '买一价',
+                            index: 0
+                        },
+                        'B2': {
+                            key: null,
+                            label: '买入2',
+                            type: 'S',
+                            name: '卖二价',
+                            index: 1
+                        },
+                        'S2': {
+                            key: null,
+                            label: '卖出2',
+                            type: 'B',
+                            name: '买二价',
+                            index: 1
+                        },
+                        'B3': {
+                            key: null,
+                            label: '买入3',
+                            type: 'S',
+                            name: '卖三价',
+                            index: 2
+                        },
+                        'S3': {
+                            key: null,
+                            label: '卖出3',
+                            type: 'B',
+                            name: '买三价',
+                            index: 2
+                        },
+                        'B4': {
+                            key: null,
+                            label: '买入4',
+                            type: 'S',
+                            name: '卖四价',
+                            index: 3
+                        },
+                        'S4': {
+                            key: null,
+                            label: '卖出4',
+                            type: 'B',
+                            name: '买四价',
+                            index: 3
+                        },
+                        'B5': {
+                            key: null,
+                            label: '买入5',
+                            type: 'S',
+                            name: '卖五价',
+                            index: 4
+                        },
+                        'S5': {
+                            key: null,
+                            label: '卖出5',
+                            type: 'B',
+                            name: '买五价',
+                            index: 4
+                        },
+                    },
+                    showTradeDialog: 'yes',
+                    showRetreatDialog: 'yes',
+                    entrustAccount: 'defaultUnit',
+                    level: 1,
+                    layout: 1
+                },
+                created() {
+                    var settings = STORAGE.getItem('settings');
+                    if (!settings) {
+                        STORAGE.removeItem('keyboard')
+                    };
+                    var keyboard = STORAGE.getItem('keyboard');
+                    settings = settings ? JSON.parse(settings) : {};
+                    var showTradeDialog = settings && settings.showTradeDialog,
+                        showRetreatDialog = settings && settings.showRetreatDialog,
+                        entrustAccount = (settings && settings.entrustAccount) ? settings.entrustAccount : 'defaultUnit',
+                        level = (settings && settings.level) ? settings.level : 1,
+                        layout = (settings && settings.layout) ? settings.layout : 1;
+                    this.showTradeDialog = showTradeDialog == 'no' ? showTradeDialog : this.showTradeDialog;
+                    this.showRetreatDialog = showRetreatDialog == 'no' ? showRetreatDialog : this.showRetreatDialog;
+                    this.entrustAccount = entrustAccount;
+                    this.level = level;
+                    this.layout = layout;
+                    this.keyboard = keyboard ? Object.assign({}, JSON.parse(keyboard)) : Object.assign({}, this.default);
+                    this.defaultKeyboard = keyboard ? Object.assign({}, JSON.parse(keyboard)) : Object.assign({}, this.default);
+                },
+                mounted: function() {
+                    var vm = this;
+                    var userAgent = navigator.userAgent.toLowerCase();
+                    window.resizeTo(445, window.outerHeight - window.innerHeight + 315);
+
+                    window.opener.window.onbeforeunload = function() {
+                        window.close()
+                    }
+                },
+                methods: {
+                    tap(param) {
+                        param == this.tab ? null : this.tab = param;
+                        switch (param) {
+                            case 'shortcut':
+                                window.resizeBy(0, 315 - window.innerHeight);
+                                break;
+                            case 'transaction':
+                                window.resizeBy(0, 185 - window.innerHeight);
+                                break;
+                            case 'layout':
+                                window.resizeBy(0, 165 - window.innerHeight);
+                                break;
+                        }
+                    },
+                    handler(e) {
+                        let keyboard = this.keyboard,
+                            selected = this.selected;
+                        Object.keys(this.keyboard).forEach(function(v) {
+                            if (keyboard[v].key == e.keyCode) {
+                                keyboard[v].key = null;
+                            }
+                        })
+                        keyboard[selected].key = ((e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 48 && e.keyCode <= 57)) ? e.keyCode : null;
+                        this.keyboard = Object.assign({}, keyboard);
+                        this.showDropdown = false;
+                    },
+                    handlerClick(key) {
+                        let keyboard = this.keyboard,
+                            selected = this.selected;
+                        Object.keys(this.keyboard).forEach(function(v) {
+                            if (keyboard[v].key == key) {
+                                keyboard[v].key = null;
+                            }
+                        })
+                        keyboard[selected].key = key;
+                        this.showDropdown = false;
+                        this.keyboard = Object.assign({}, keyboard);
+                    },
+                    handleSelectPrice(v, o) {
+                        this.keyboard[v] = Object.assign({}, this.keyboard[v], o);
+                        this.showPriceDropdown = false;
+
+                    },
+                    save() {
+                        var settings = {
+                            'showTradeDialog': this.showTradeDialog == 'no' ? 'no' : 'yes',
+                            'showRetreatDialog': this.showRetreatDialog == 'no' ? 'no' : 'yes',
+                            'entrustAccount': this.entrustAccount,
+                            'level': this.level,
+                            'layout': this.layout,
+                        }
+                        STORAGE.setItem('keyboard', JSON.stringify(this.keyboard));
+                        STORAGE.setItem('settings', JSON.stringify(settings));
+                        // STORAGE.setItem('showTradeDialog', this.showTradeDialog == 'no' ? 'no' : 'yes');
+                        // STORAGE.setItem('showRetreatDialog', this.showRetreatDialog == 'no' ? 'no' : 'yes');
+                        ACTION.showToast({
+                            msg: '保存成功'
+                        });
+                        setTimeout(function() {
+                            window.close()
+                        }, 500);
+                    },
+                    hideKeyboard: function() {
+                        window.close();
+                    },
+                    getClientHeight: function() {
+                        var clientHeight = 0;
+                        if (document.body.clientHeight && document.documentElement.clientHeight) {
+                            var clientHeight = (document.body.clientHeight < document.documentElement.clientHeight) ? document.body.clientHeight : document.documentElement.clientHeight;
+                        } else {
+                            var clientHeight = (document.body.clientHeight > document.documentElement.clientHeight) ? document.body.clientHeight : document.documentElement.clientHeight;
+                        }
+                        return clientHeight;
+                    }
+                }
+            })
+        </script>
+</body>
+
+</html>

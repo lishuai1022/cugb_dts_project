@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DTS交易平台</title>
+    <link rel="shortcut icon" href="logo.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="/resources/easyui/themes/dts_theme/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/resources/easyui/themes/icon.css">
+    <script src="/resources/js/vue.min.js"></script>
+    <script src="/resources/js/json2.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/resources/easyui/js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/resources/easyui/js/jquery.easyui.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/resources/easyui/locale/easyui-lang-zh_CN.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="/resources/css/main.css?t=0127">
+    <script src="/resources/js/jr.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/resources/js/util.js"></script>
+    <script type="text/javascript" src="/resources/js/easyui-util.js"></script>
+</head>
+
+<body>
+    <style>
+        input:-webkit-autofill,
+        textarea:-webkit-autofill,
+        select:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0px 1000px white inset;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .login_wrapper .dialog-bg .dialog-main {
+            margin-left: -150px !important;
+        }
+        
+        .input_field {
+            padding: 0;
+            line-height: 38px;
+            height: 40px;
+            width: 280px;
+            padding-left: 50px;
+            border: 1px solid transparent;
+            outline: none;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        input::-webkit-input-placeholder {
+            color: #999;
+        }
+        
+        input::-webkit-input-placeholder {
+            font-size: 12px;
+        }
+        /* 使用webkit内核的浏览器 */
+        
+        input:-moz-placeholder {
+            font-size: 12px;
+        }
+        /* Firefox版本4-18 */
+        
+        input::-moz-placeholder {
+            font-size: 12px;
+        }
+        /* Firefox版本19+ */
+        
+        input:-ms-input-placeholder {
+            font-size: 12px;
+        }
+        /* IE浏览器 */
+        
+        input::-ms-clear {
+            display: none;
+        }
+        
+        .svg_img {
+            position: absolute;
+            top: 7px;
+            left: 10px;
+            height: 24px;
+            width: 24px;
+        }
+        
+        .errorMsg {
+            color: #f45d5d;
+            display: inline-block;
+            vertical-align: top;
+            height: 20px;
+            font-size: 12px;
+            line-height: 20px;
+        }
+        
+        .gbtn {
+            line-height: 40px;
+            height: 40px;
+            color: #fff;
+            width: 280px;
+            display: block;
+            margin: 0 auto;
+            background: #ED5A54;
+            outline: none;
+            border: none;
+            margin-top: 30px;
+        }
+        
+        .optBox {
+            position: absolute;
+            top: 10px;
+            right: 5px;
+            height: 20px;
+            border: 1px solid transparent;
+        }
+        
+        .errorMsgBox {
+            position: absolute;
+            top: 10px;
+            right: 5px;
+            height: 20px;
+            border: 1px solid transparent;
+        }
+        
+        .tmp {
+            height: 10px;
+        }
+        
+        .isClear {
+            right: 115px;
+        }
+        
+        .clearText,
+        .showText {
+            background: url('/resources/images/input_icon_cancel.png') no-repeat;
+            background-size: cover;
+            display: inline-block;
+            vertical-align: top;
+            height: 20px;
+            width: 20px;
+        }
+        
+        .showText {
+            /* background: url('/resources/images/index_icon_show.png') no-repeat; */
+            background-size: cover;
+            display: none;
+        }
+        /*不可见*/
+        
+        .showText.active {
+            /* background: url('/resources/images/index_icon_hide.png') no-repeat; */
+            background-size: cover;
+        }
+        
+        .border_bottom {
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .login_container {
+            width: 480px;
+            padding: 0 100px 50px;
+            margin: 0 auto;
+            /* background: #fff; */
+        }
+        
+        .loginBox {
+            width: 100%;
+        }
+        
+        .loginBox .formRow {
+            text-align: left;
+        }
+        
+        .loginBox .formRow .fContent {
+            position: relative;
+        }
+        
+        .loginBox .formRow .fContent .optBox {
+            position: absolute;
+            top: 10px;
+            right: 5px;
+            height: 20px;
+            border: 1px solid transparent;
+        }
+        
+        .btn_yzm {
+            outline: none;
+            border: none;
+            color: #fff;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            width: 90px;
+            height: 40px;
+            border: 0px solid transparent;
+            display: block;
+            vertical-align: top;
+        }
+        
+        .login_wrapper {
+            position: relative;
+            height: 100vh;
+            min-height: 462px;
+            background: #000;
+        }
+        
+        .login_wrapper .wrapper_bg {
+            height: 100%;
+            background: url('/resources/images/login_bg.jpg') center center no-repeat;
+            background-size: cover;
+        }
+        
+        .login_wrapper .wrapper_bg .opacity_bg {
+            height: 100%;
+            background: rgba(66, 64, 87, 0.94);
+        }
+        
+        .login_wrapper .main {
+            position: absolute;
+            margin-top: -187px;
+            margin-left: -240px;
+            top: 50%;
+            left: 50%;
+        }
+        
+        .login_wrapper .main .title {
+            margin: 0 auto;
+            height: 72px;
+            width: 220px;
+            background: url('/resources/images/login_title.png') center center no-repeat;
+            background-size: cover;
+            margin-bottom: 24px;
+        }
+        
+        .login_wrapper .main .title::before {
+            display: none;
+            content: '';
+        }
+        
+        .toastBox {
+            position: fixed;
+            z-index: 9999;
+            min-width: 200px;
+            padding: 20px 16px;
+            transform: translate(-50%, 0);
+            -webkit-transform: translate(-50%, 0);
+            top: 40%;
+            left: 50%;
+            text-align: center;
+            background: rgba(66, 64, 87, 1);
+            color: #fff;
+            border-radius: 2px;
+            font-size: 12px;
+            border-radius: 4px;
+            box-shadow: 0 0 50px #999;
+        }
+        
+        .toastBox .content {}
+        
+        .toastBox .optionGroup {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .toastBox .optionGroup button {
+            width: 60px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: top;
+            font-size: 12px;
+            line-height: 24px;
+            border: none;
+            outline: none;
+            color: #fff;
+        }
+        
+        .toastBox .optionGroup button.sure {
+            background: rgb(237, 90, 84);
+        }
+        
+        .toastBox .optionGroup button.cancel {
+            background: transparent;
+            border: 1px solid #fff;
+        }
+    </style>
+    <div class="login_wrapper" id="login_container">
+        <div class="title-bar"></div>
+        <div class="wrapper_bg">
+            <div class="opacity_bg"></div>
+        </div>
+        <div class="main">
+            <div class="title">
+
+            </div>
+            <div class="login_container">
+                <div class="black_bg">
+                </div>
+                <div class="loginBox" id="login">
+                    <form @submit.prevent="submit" autocomplete="off">
+                        <div class="formRow">
+                            <div class="fContent">
+                                <img class="svg_img" src="/resources/images/login01.svg" alt="">
+                                <input class="input_field " placeholder="请输入账号" type="text" maxlength="20" autocomplete="off" v-model="username" @input="username=username.replace(/[^\da-zA-Z]/g,'')" @focus="userErr=''">
+                                <div class="optBox">
+                                    <span class="errorMsg">{{userErr}}</span>
+                                    <span class="clearText pull-right" v-show="username.length!=0" @click="username='';userErr=''"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="formRow">
+                            <div class="tmp"></div>
+                        </div>
+                        <div class="formRow">
+                            <div class="fContent">
+                                <img class="svg_img" src="/resources/images/login02.svg" alt="">
+                                <input class="input_field" placeholder="请输入密码" type="password" name="password" autocomplete="off" maxlength="20" v-model="pwd" @input="pwd=pwd.replace(/[^\da-zA-Z]/g,'')" @focus="pwdErr=''">
+                                <div class="optBox">
+                                    <span class="errorMsg">{{pwdErr}}</span>
+                                    <span class="clearText pull-right" v-show="pwd.length!=0" @click="pwd='';pwdErr=''"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="formRow">
+                            <div class="tmp"></div>
+                        </div>
+                        <div class="formRow">
+                            <div class="fContent">
+                                <img class="svg_img" src="/resources/images/login03.svg" alt="">
+                                <input class="input_field" type="text" :placeholder="phonecodeErr.length!=0?'':'请输入验证码'" name="phonecode" autocomplete="off" maxlength="4" v-model="phonecode" @input="phonecode=phonecode.replace(/[^\d]/g,'')" @focus="phonecodeErr=''">
+                                <div class="optBox" style="right:95px;">
+                                    <span class="errorMsg">{{phonecodeErr}}</span>
+                                    <span class="clearText pull-right" v-show="phonecode.length!=0" @click="phonecode='';phonecodeErr=''"></span>
+                                </div>
+                                <img class="btn_yzm" :src="resUrl" @click="count++" />
+                            </div>
+                        </div>
+                        <div class="formRow">
+                            <div class="tmp"></div>
+                        </div>
+                        <button class="gbtn">登录</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win_account_ban" class="easyui-window" title="提示" style="width:300px;" data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+	 minimizable:false,maximizable:false,closed:true">
+        <p style="text-align: center;padding:20px 0;">账户停用，无法登录，请联系平台客服</p>
+        <div class="dialog_footer">
+            <a class="btn-red btn-ok" data-options="iconCls:'icon-ok'" style="width:90px;">确定</a>
+        </div>
+    </div>
+    <div id="win_account_error" class="easyui-window" title="提示" style="width:300px;" data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+	 minimizable:false,maximizable:false,closed:true">
+        <p style="text-align: center;padding:20px 0;">账户异常，无法登录，请联系平台客服</p>
+        <div class="dialog_footer">
+            <a class="btn-red btn-ok" data-options="iconCls:'icon-ok'" style="width:90px;">确定</a>
+        </div>
+    </div>
+    <div id="win_account_logined" class="easyui-window" title="提示" style="width:300px;" data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,
+	 minimizable:false,maximizable:false,closed:true">
+        <p style="text-align: center;padding:20px 0;">该账号已登录，确定继续登录？</p>
+        <div class="dialog_footer">
+            <a class="btn-border btn-no" data-options="iconCls:'icon-cancel'" style="width:90px">取消</a>
+            <a class="btn-red btn-ok" data-options="iconCls:'icon-ok'" style="width:90px;margin-left: 20px">确定</a>
+        </div>
+    </div>
+    <script>
+        var ACTION = {
+            isLogin: function() {
+                //深入检测内部属性,缺一不可,存在的时候返回的是userInfo的值
+                let userInfo = STORAGE.getItem('user') || '';
+                if (userInfo) {
+                    return userInfo;
+                }
+                return false;
+            }
+        }
+
+        function showWithdrawDialog(index, callBack) {
+            var selectors = ['#win_account_ban', '#win_account_error', '#win_account_logined']
+            EUtils.openWindow(selectors[index], function() {
+                EUtils.closeWindow(selectors[index]);
+                if (index == 2) {
+                    callBack && callBack();
+                }
+            })
+        }
+
+
+        // import CusDialog from '@component/CusDialog'
+        new Vue({
+            el: '#login_container',
+            data: {
+                username: '',
+                pwd: '',
+                phonecode: '', //验证码
+                userErr: '',
+                pwdErr: '',
+                phonecodeErr: '',
+
+                showComfirmDialog: false, //账号禁用的弹窗提示
+                banMsg: '',
+
+                count: 0, //图片验证码版本号
+                imgBaseUrl: '/api/imgcode/get?type=0', //图片url
+                imgCheckUrl: '/api/imgcode/valid', // 验证code url
+                loginUrl: '/api/user/login', //登录url
+                userCheckUrl: '/api/user/check', // 检测是否登录url
+
+                account_ban: !true,
+                account_error: !true,
+                account_logined: !true
+            },
+            components: {},
+            computed: {
+                resUrl: function() {
+                    return this.imgBaseUrl + '&t=' + this.count
+                }
+            },
+            created() {
+                let isLogin = ACTION.isLogin()
+                if (isLogin) {
+                    window.location.href = '/index.html';
+                }
+                this.username = STORAGE.getItem('user_account') || '';
+            },
+            mounted() {},
+            methods: {
+                //过滤空格非法字符
+                replaceRule(value) {
+                    value = value.replace(/[^\d]|[^a-z]|[^A-Z]/g, '');
+                },
+                clearErr() {
+                    this.userErr = '';
+                    this.pwdErr = '';
+                    this.phonecodeErr = '';
+                    this.banMsg = '';
+                },
+                submit() {
+                    this.clearErr();
+                    let flg = true;
+                    if (this.username == '') {
+                        this.userErr = '账号不能为空'
+                        flg = false;
+                    }
+                    if (this.pwd == '') {
+                        this.pwdErr = '密码不能为空'
+                        flg = false;
+                    }
+                    if (this.phonecode == '') {
+                        this.phonecodeErr = '请输入图形验证码'
+                        flg = false;
+                    }
+                    if (!flg) return;
+
+                    let _this = this;
+
+                    //先判断图片验证码是否正确在发送实际的请求
+                    $.ajax({
+                        type: "post",
+                        url: _this.imgCheckUrl,
+                        data: {
+                            imgcode: this.phonecode
+                        },
+                        success: function(res) {
+                            if (res.status == 0) {
+                                let opt = {
+                                    account: _this.username,
+                                    pwd: _this.pwd,
+                                    imgcode: _this.phonecode
+                                };
+
+                                _this.login(opt)
+
+                                // 下次迭代添加 登录检查 判断是否登录
+                                // _this.loginCheck(opt, _this.login);
+                            } else {
+                                _this.phonecodeErr = res.msg;
+                                _this.count++;
+                            }
+                        }
+                    })
+                },
+                loginCheck(opt, callBack) {
+                    $.ajax({
+                        type: "get",
+                        url: this.userCheckUrl,
+                        data: {
+                            account: this.username
+                        },
+                        success: function(res) {
+                            if (res.status == 0 && res.data.login == 1) {
+                                showWithdrawDialog(2, function() {
+                                    callBack(opt);
+                                })
+                            } else {
+                                callBack(opt)
+                            }
+                        }
+                    })
+                },
+                login(opt) {
+                    var _this = this;
+                    $.ajax({
+                        type: "post",
+                        url: _this.loginUrl,
+                        data: opt,
+                        success: function(res, textStatus, jqXHR) {
+                            if (res.status == 0) {
+                                _this.userInfo = res.data;
+                                STORAGE.setItem('user_account', _this.username);
+                                STORAGE.setItem('user', res.data);
+                                window.location.href = '/';
+                            } else {
+                                // 错误信息参考 http://redmine.aokebaer.com/projects/transaction/wiki/Webapi#section-6
+                                _this.count++; //只要失败就刷新图片验证码
+                                if (res.status == '-2502') {
+                                    _this.pwdErr = res.msg;
+
+                                } else if (res.status == '-2503') {
+                                    // 账号停用
+                                    _this.banMsg = res.msg;
+                                    _this.showComfirmDialog = true;
+                                    showWithdrawDialog(0);
+
+                                } else if (res.status == 'xxx') {
+                                    // 账户被逻辑删除
+                                    showWithdrawDialog(1);
+                                }
+                            }
+                        }
+                    })
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

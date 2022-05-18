@@ -1,0 +1,41 @@
+{
+	"status": "0",
+	"msg": "ok",
+	"islogin": true,
+	"data": {
+		"total": 4,
+		"list": [{
+			"trader_id": 1,
+			"profit": "0.0000",
+			"trader_name": "于圣民",
+			"team_name": "团队122222222222",
+			"tprofit": "39393",
+			"interest": "1.2",
+			"count": 100
+		}, {
+			"trader_id": 2,
+			"profit": "0.0000",
+			"trader_name": "李京波",
+			"team_name": null,
+			"tprofit": -3,
+			"interest": -2,
+			"count":-100
+		}, {
+			"trader_id": 3,
+			"profit": "90.3600",
+			"trader_name": "测试1",
+			"team_name": "团队A222",
+			"tprofit": null,
+			"interest": null,
+			"count": "--"
+		}, {
+			"trader_id": 88,
+			"profit": "173.5029",
+			"trader_name": null,
+			"team_name": null,
+			"tprofit": null,
+			"interest": null,
+			"count": "--"
+		}]
+	}
+}

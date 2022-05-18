@@ -1,0 +1,111 @@
+<div id="overnight_position_trader" data-options="fit:true" class="easyui-layout">
+    <div data-options="region:'center',border:false" style="border-right:1px solid #d4d4d4;">
+        <table id="overnight_position_trader_table"  style="width: 100%;height:100%;"></table>
+        <div id="overnight_position_trader_top_bar" class="clearfix" style="text-align:right;">
+            <div class="fr">
+                <div class="flow_box p2">
+                    <div class="flow_box p5">交易员名称:</div>
+                    <input class="traderSelect" style="width:110px"/>
+                </div>
+                <div class="flow_box p2">
+                    <div class="flow_box p5">资金账户:</div>
+                    <input class="accountSelect" style="width:110px"/>
+                </div>
+                <div class="flow_box p2">
+                    <div class="flow_box p5">日期:</div>
+                    <input class="easyui-datebox startTime" name="startTime"  style="width:110px;" prompt="开始时间">&nbsp;至
+                    <input class="easyui-datebox endTime" name="endTime"   style="width:110px;" prompt="截止时间">
+                </div>
+                <div class="flow_box p2">
+                    <input class="easyui-textbox keyword" data-options="prompt:'股票代码/名称'" type="text" style="width:90px">
+                </div>
+                <div class="flow_box p2">
+                    <a href="#" class="easyui-linkbutton" iconCls="icon-search" @click="search">搜索</a>
+                </div>
+                <div class="flow_box p2">
+                    <a href="#" class="easyui-linkbutton" iconCls="icon-redo" @click="getExcel">导出</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+    !function(){
+        new Vue({
+            el:'#overnight_position_trader',
+            data:{
+            },
+            mounted:function(){
+                this.initAccount_TraderSelector({el:'#overnight_position_trader .accountSelect'},{el:'#overnight_position_trader .traderSelect'});
+                this.initTableData();
+            },
+            methods:{
+                initTableData:function(){
+                    var vm=this;
+                    var optionData ={
+                        url:'/api/cash/trader',
+                        queryParams: {},
+                        pagination: true,
+                        pageSize:30,
+                        border:false,
+                        method:'get',
+                        toolbar:'#overnight_position_trader_top_bar',
+                        autoRowHeight:false,
+                        singleSelect:true,
+                        striped:true,
+                        fitColumns:true,
+                        scrollbarSize:0,
+                        frozenColumns:[[
+                           
+                        ]],
+                        columns:[[
+                            {field:'date',width:140,align:'center',title:'日期',sortable:true,fixed:true},
+                            {field:'trader_name',width:120,align:'center',title:'交易员名称',sortable:false},
+                            {field:'scode',width:90,align:'center',title:'股票代码',sortable:false,fixed:true},
+                            {field:'sname',width:90,align:'center',title:'股票名称',sortable:false,fixed:true},
+                            {field:'account_name',width:120,align:'center',title:'资金账户',sortable:false},
+                            {field:'count',width:140,align:'center',title:'隔夜头寸数量',sortable:true,formatter:API.METHODS.colorNumberFormatterInt},
+                            {field:'price',width:140,align:'center',title:'头寸成本',sortable:true,formatter:API.METHODS.numberFormatter}
+                        ]],
+                        onBeforeLoad:function(param){
+                            var queryParams = {}
+                            try{queryParams = vm.getQueryParam();}catch(e){}
+                            Object.assign(param,queryParams);
+                        }
+                    };
+                    API.METHODS.loadData('#overnight_position_trader_table',optionData);
+                },
+                getQueryParam:function(){
+                    var queryParams = {}
+                    try{
+                        queryParams = $('#overnight_position_trader_table').datagrid('options').queryParams;
+                    }catch(e){
+                    }finally{
+                    }
+                    queryParams.keyword = $('#overnight_position_trader .keyword').val();
+                    queryParams.account_id = $('#overnight_position_trader .accountSelect').combobox('getValues').join(',');
+                    queryParams.trader_id = $('#overnight_position_trader .traderSelect').combobox('getValues').join(',');
+                    if( $('#overnight_position_trader .startTime').datebox('getValue')){
+                        queryParams.sdate = $('#overnight_position_trader .startTime').datebox('getValue').split(' ')[0]
+                    }else{
+                        delete queryParams.sdate;
+                    }
+                    if( $('#overnight_position_trader .endTime').datebox('getValue')){
+                        queryParams.edate = $('#overnight_position_trader .endTime').datebox('getValue').split(' ')[0]
+                    }else{
+                        delete queryParams.edate;
+                    }
+                    return queryParams;
+                },
+                search:function(){//搜索
+                    $('#overnight_position_trader_table').datagrid('gotoPage', 1);
+                },
+                getExcel:function(){
+                    this.exportExcel('#overnight_position_trader_table')
+                }
+            }
+        })
+    }();
+
+</script>

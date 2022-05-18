@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>dts交易平台</title>
+    <link rel="shortcut icon" href="logo.ico" type="image/x-icon" />
+    <script src="/resources/js/super.js"></script>
+    <script type="text/javascript">
+        //防止页面后退
+        if (isMac() || getIEVersion() > 9) {
+            history.pushState(null, null, document.URL);
+            window.addEventListener('popstate', function() {
+                history.pushState(null, null, document.URL);
+            });
+        }
+
+        ! function() {
+            var isLogin = API.METHODS.checkLogin();
+            if (!isLogin) {
+                window.location.href = '/login.html';
+            }
+        }();
+    </script>
+</head>
+<style type="text/css">
+    body {
+        /*background-color: #424156;*/
+        color: #fff;
+    }
+    
+    .index-nav {
+        height: 40px;
+        width: 100%;
+        font-size: 14px;
+        background-color: rgba(78, 75, 106, 1);
+        margin-bottom: 10px;
+    }
+    
+    .index-nav ul {
+        width: auto;
+        /*宽度也改为自动*/
+        list-style-type: none;
+        white-space: nowrap;
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .index-nav ul {
+        float: left;
+    }
+    
+    .index-nav ul li {
+        display: inline-block;
+        width: 90px;
+        height: 40px;
+        line-height: 40px;
+        float: left;
+        text-align: center;
+        cursor: pointer;
+    }
+    
+    .index-nav .activate {
+        background-color: #FF4C4C !important;
+    }
+    
+    .index-nav ul li:after {
+        content: '';
+        display: inline-block;
+        width: 1px;
+        height: 20px;
+        color: #fff;
+    }
+    
+    .index-nav .nav-right {
+        float: right;
+        display: inline-block;
+        line-height: 40px;
+        padding-right: 5px;
+    }
+    
+    .menu-shadow {
+        display: none!important;
+    }
+</style>
+
+<body>
+    <div id="" style="height:100%;width:100%;">
+        <div class="index-nav">
+            <ul>
+                <li class="activate">股票持仓</li>
+                <li onclick="clickNav(1)">未成委托</li>
+                <li onclick="clickNav(2)">未平仓位</li>
+                <li onclick="clickNav(3)">委托记录</li>
+                <!-- <li onclick="clickNav(4)">成交记录</li> -->
+                <li onclick="clickNav(5)">盈亏报表</li>
+                <li onclick="clickNav(6)">设置</li>
+                <li class="dowload" onmouseover="javascript:showDowMenu()">下载
+                </li>
+            </ul>
+            <div class="nav-right" id="userOpt">
+                <span class="text"></span>
+                <img class="close" src="/resources/images/close.svg" alt="" style="vertical-align: top;margin:12px 5px;">
+            </div>
+        </div>
+        <table id="index_position_table" fitColumns="true" fit="true"></table>
+
+        <div class="easyui-menu" data-options="onClick:menuHandler,minWidth:125" style="background-color:rgb(97,96,125) ">
+            <div data-options="id:1" class="menu-item">Win客户端</div>
+            <div class="menu-sep" style="margin: 0;border-top: none;border-bottom: 1px solid rgb(84,83,108)"></div>
+            <div data-options="id:2">Mac客户端</div>
+            <div class="menu-sep" style="margin: 0;border-top: none;border-bottom: 1px solid rgb(84,83,108)"></div>
+            <div data-options="id:3">SDK</div>
+
+        </div>
+    </div>
+    <div id="win_user_logout" class="easyui-window" title="提示" style="width:300px;" data-options="closable:true,modal:true,inline:true,resizable:false,collapsible:false,minimizable:false,maximizable:false,closed:true">
+        <p style="text-align: center;padding:0px 0;">确定要退出该账户吗</p>
+        <div class="dialog_footer">
+            <a class="btn-border btn-no" data-options="iconCls:'icon-cancel'" onclick="$('#win_user_logout').window('close')" style="width:90px">取消</a>
+            <a class="btn-red btn-ok" data-options="iconCls:'icon-ok'" style="width:90px;margin-left:20px;">确定</a>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var windowManage = {};
+
+        function setUser() {
+            var user = STORAGE.getItem('user');
+            $('#userOpt .text').text('欢迎您，' + user.account + '(' + (user.trader_name || '--') + ')');
+
+            $('#userOpt .close').on('click', function() {
+                EUtils.openWindow('#win_user_logout', function() {
+                    API.METHODS.getData('/api/user/logout', {}, function(res) {
+                        EUtils.closeWindow('#win_user_logout')
+                        API.METHODS.removeUserInfo();
+                        window.location.href = '/login.html';
+                    }, 'get')
+                });
+            })
+        }
+
+        function showDowMenu() {
+            $('.easyui-menu').menu('show', {
+                left: $('.index-nav .dowload').offset().left,
+                top: $('.index-nav .dowload').offset().top + 40,
+            })
+        }
+
+        function menuHandler(item) {
+            switch (item.id) {
+                case 1:
+                    window.location.href = "https://app.pz.youlikj.com/DTS-1.1.0.exe";
+                    break;
+                case 2:
+                    window.location.href = "https://app.pz.youlikj.com/DTS-1.1.0.dmg";
+                    break;
+                case 3:
+                    window.location.href = "/static/upload/dts/dts交易系统接入文档.zip"
+                    break
+            }
+        }
+
+        function clickNav(nIndex) {
+            var height = window.screen.availHeight;
+            var width = window.screen.availWidth;
+            //top值 如果高度都是屏幕的50%  每个top值需要依次增加30 如果不是需要自己调整top值 let计算方式相同
+            switch (nIndex) {
+                case 0: //股票持仓
+                    break;
+                case 1: //未成委托
+                    this.windowManage.ewindow = window.open('/view/entrust.html', '未成委托', `left=${(width-width/1.5)/2},top=${height/4},height=${height/2}, width=${width/1.5}`);
+                    break;
+                case 2: //未平仓位
+                    this.windowManage.upwindow = window.open('/view/uncovered_position.html', '未平仓位', `left=${(width-width/2)/2},top=${height/4+30},height=${height/2}, width=${width/2}`);
+                    console.log(this.windowManage.upwindow);
+                    break;
+                case 3: //委托记录
+                    this.windowManage.erwindow = window.open('/view/entrust_record.html', '委托记录', `left=${(width-width/1.5)/2},top=${height/4+30*2},height=${height/2}, width=${width/1.5}`);
+                    break;
+                case 4: //成交记录
+                    this.windowManage.trwindow = window.open('/view/transaction_record.html', '成交记录', `left=${(width-width/1.5)/2},top=${height/4+30*3},height=${height/2}, width=${width/1.5}`);
+                    break;
+                case 5: //盈亏报表
+                    this.windowManage.plwindow = window.open('/view/profit_loss.html', '盈亏报表', `left=${(width-width/1.5)/2},top=${height/4+30*4},height=${height/2}, width=${width/1.5}`);
+                    break;
+                case 6: //设置
+                    this.windowManage.swindow = window.openWindow('/view/setting.html', '设置', 445, 425);
+                    // window.openWindow('/view/trade.html', 'sss', 600, 500);
+                    break;
+            }
+        }
+        setUser();
+        window.addEventListener('storage', function(e) {
+            console.log(this.windowManage);
+            console.log(windowManage['ewindow'].closed);
+            if (e.key == 'user') {
+                var user = STORAGE.getItem('user');
+                if (user == '') {
+                    for (let key in windowManage) {
+                        console.log(windowManage[key].closed);
+                        if (windowManage[key] && !windowManage[key].closed) {
+                            windowManage[key].close();
+                        }
+                    }
+                    window.location.href = '/login.html';
+                }
+            }
+        })
+    </script>
+    <script type="text/javascript">
+        var Index = {
+            context: this,
+            init: function() {
+                this.initTableData();
+                this.startTimer();
+            },
+            initTableData: function() {
+                var optionData = {
+                    url: '/api/query/position',
+                    pagination: false,
+                    pageSize: 30,
+                    scrollbarSize: 0,
+                    border: false,
+                    method: 'get',
+                    loadMsg: '',
+                    // toolbar: '#entrust_record-toolbar',
+                    autoRowHeight: false,
+                    singleSelect: true,
+                    striped: true,
+                    fitColumns: true,
+                    scrollbarSize: 0,
+                    columns: [
+                        [{
+                            field: 'ccode',
+                            width: 60,
+                            align: 'center',
+                            title: '证券代码',
+                            sortable: true
+                        }, {
+                            field: 'cname',
+                            width: 60,
+                            align: 'center',
+                            title: '证券名称',
+                            sortable: true
+                        }, {
+                            field: 'fname',
+                            width: 60,
+                            align: 'center',
+                            title: '资金账户',
+                            sortable: true
+                        }, {
+                            field: 'balance',
+                            width: 60,
+                            align: 'center',
+                            title: '可用金额',
+                            sortable: true,
+                        }, {
+                            field: 'acount',
+                            width: 60,
+                            align: 'center',
+                            title: '分配数量',
+                            sortable: true
+                        }, {
+                            field: 'hcount',
+                            width: 60,
+                            halign: 'center',
+                            align: 'right',
+                            title: '持仓数量',
+                            sortable: true
+                        }, {
+                            field: 'bcount',
+                            width: 60,
+                            halign: 'center',
+                            align: 'right',
+                            title: '已买数量',
+                            sortable: true,
+                        }, {
+                            field: 'scount',
+                            width: 60,
+                            halign: 'center',
+                            align: 'right',
+                            title: '已卖数量',
+                            sortable: true
+                        }, {
+                            field: 'cash_count',
+                            width: 60,
+                            align: 'center',
+                            title: '头寸股数',
+                            sortable: true,
+                        }, {
+                            field: 'cash_price',
+                            width: 60,
+                            align: 'center',
+                            title: '头寸成本',
+                            sortable: true,
+                        }, {
+                            field: 'buy_onroad_money',
+                            width: 60,
+                            align: 'center',
+                            title: '买入在途',
+                            sortable: true,
+                        }, {
+                            field: 'sell_onroad_money',
+                            width: 60,
+                            align: 'center',
+                            title: '卖出在途',
+                            sortable: true,
+                        }, {
+                            field: 'deal_profit',
+                            width: 60,
+                            align: 'center',
+                            title: '交易盈亏',
+                            sortable: true,
+                        }, {
+                            field: 'float_profit',
+                            width: 60,
+                            align: 'center',
+                            title: '浮动盈亏',
+                            sortable: true,
+                        }, ]
+                    ],
+                    onBeforeLoad(p) {
+                        p['can_cancel'] = ''
+                    },
+                    onClickRow(index, rowData) {
+                        if (windowManage[rowData.ccode + '-' + rowData.faccount_id]) {
+                            windowManage[rowData.ccode + '-' + rowData.faccount_id].focus();
+                        } else {
+                            windowManage[rowData.ccode + '-' + rowData.faccount_id] = window.openWindow('/view/trade.html?ccode=' + rowData.ccode + '&cname=' + rowData.cname + '&faccount_id=' + rowData.faccount_id + '&fname=' + rowData.fname, rowData.ccode + '-' + rowData.faccount_id, 280, 470);
+                        }
+                    },
+                    loadFilter: function(data) {
+                        if (data['status'] != 0) {
+                            API.METHODS.removeUserInfo();
+                            setTimeout(function() {
+                                window.location.href = '/login.html';
+                            }, 2000)
+                        } else {
+                            if (data.status == '0') {
+                                if (optionData.pagination) {
+                                    return {
+                                        "rows": data['data']['list'],
+                                        'total': data.data.total,
+                                        "isFilter": true
+                                    };
+                                }
+                                return {
+                                    "rows": data['data']['list'],
+                                    "isFilter": true
+                                };
+
+                            } else {
+                                return {
+                                    "rows": [],
+                                    'total': 0,
+                                    "isFilter": true
+                                };
+                            }
+                        }
+                    }
+                }
+                API.METHODS.loadData('#index_position_table', optionData);
+            },
+            showWithdrawDialog: function() {
+                if (STORAGE.getItem('showRetreatDialog')) {
+                    EUtils.openWindow('#win_entrust_withdraw', function() {
+                        this.withdraw();
+                    })
+                } else {
+                    this.withdraw();
+                }
+
+            },
+            withdraw: function() {
+                let url = '/api/stock/cancel'
+                API.METHODS.getData(url, {}, function(res) {
+                    if (res.status == 0) {
+                        EUtils.toast(res['msg'])
+                    } else {
+
+                    }
+                }, 'post')
+            },
+            getStatusText(status) {
+                switch (status) {
+                    case 'unsend':
+                        return '未报';
+                    case 'tosend':
+                        return '待报';
+                    case 'tocancel':
+                        return '待撤';
+                    case 'sent':
+                        return '已报';
+                    case 'sending':
+                        return '正报';
+                    case 'canceling':
+                        return '正撤';
+                    case 'canceled':
+                        return '已撤';
+                    case 'pcanceled':
+                        return '部撤';
+                    case 'dealt':
+                        return '已成';
+                    case 'pdealt':
+                        return '部成';
+                    case 'cexpired':
+                        return '撤废';
+                    case 'expired':
+                        return '废单';
+                    case 'pexpired':
+                        return '部废';
+                    default:
+                        return '--';
+                }
+            },
+            startTimer: function() {
+                setInterval(function() {
+                    $('#index_position_table').datagrid('reload')
+                }, 3000)
+            }
+        }
+        Index.init();
+    </script>
+</body>
+
+</html>

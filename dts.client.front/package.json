@@ -1,0 +1,16 @@
+{
+  "name": "caifuqiao-stock",
+  "version": "0.0.1",
+  "author": "caifuqiao",
+  "license": "ISC",
+  "description": "vue2 + webpack2 + vuex2 + vue-router2 + axios + wevue",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --open --hot"
+  },
+  "devDependencies": {
+    "webpack": "4.9.1",
+    "webpack-cli": "2.1.4",
+    "webpack-dev-server": "3.1.1"
+  }
+}

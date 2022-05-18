@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>成交记录</title>
+    <link rel="shortcut icon" href="logo.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="/resources/css/dts_code_search.css">
+    <script src="/resources/js/super.js"></script>
+    <style>
+        .label{color:#9492b0;padding-left:20px;}
+    </style>
+</head>
+<body>
+    <div style="height:100%;width:100%;" id="transaction_record">
+        <div class="title-bar"></div>
+        <div id="transaction_record-toolbar" class="color-bg" style="padding:5px 5px;text-align:right;">
+                <span class="label">资金账户&nbsp;</span><input class="accountSelect" style="width:90px;height:24px;"/>
+                <span class="label">委托方向&nbsp;</span><input class="directionSelect" style="width:90px;height:24px;"/>
+                <span class="label"></span>
+                <input class="easyui-datebox startTime" name="startTime"  style="width:110px;height:24px;" prompt="开始时间">
+                -
+                <input class="easyui-datebox endTime" name="endTime"   style="width:110px;height:24px;" prompt="截止时间">
+                <span class="label">股票代码&nbsp;</span>
+                <input type="text" class="code_search_input transaction_record_keyword" style="width:110px;height:24px;" placeholder="请输入股票代码">
+                <a class="btn-red btn-ok btn_search" data-options="iconCls:'icon-ok'" style="width:90px;margin:0 20px;">搜索</a>
+                <a class="btn-border btn-no btn_excel" data-options="iconCls:'icon-cancel'" style="width:90px">导出</a>
+        </div>
+        <table id="transaction_record_table" fitColumns="true" fit="true"></table>
+
+    </div>
+<script type="text/javascript">
+!function(){
+
+    var model = {};
+    var view = {};
+    var controller = {
+        view:null,
+        model:null,
+        init:function(view,model){
+            this.view = view;
+            this.model = model;
+            this.bindEvents();
+            this.getAccountListOption();
+            this.getDirection();
+            EUtils.remoteCodeSearch('#transaction_record .transaction_record_keyword');
+            setTimeout(() => {
+                EUtils.setDefaultDateByState('currentDay',['#transaction_record .startTime','#transaction_record .endTime']);
+            }, 0);
+            setTimeout(() => {
+                this.initTableData();
+            }, 200);
+        },
+        bindEvents:function(){
+                var that = this;
+                EUtils.tableEventEntrust({
+                    el:'#transaction_record_table',
+                    entrustEl:'#transaction_record .transaction_record_detail',
+                    callBack:function(target,row){
+                        that.openDetail(row);
+                    }
+                })
+
+                $('#transaction_record .btn_search').on('click',function(){
+                    that.search();
+                })
+                $('#transaction_record .btn_excel').on('click',function(){
+                    that.getExcel();
+                })
+            },
+            initTableData:function(opt){
+                var queryParams = this.getQueryParam();
+                var optionData = {
+                    url: '/api/query/fill',
+                    queryParams: queryParams,
+                    pagination: true,
+                    pageSize:30,
+                    scrollbarSize:0,
+                    border:false,
+                    method:'get',
+                    toolbar:'#transaction_record-toolbar',
+                    autoRowHeight:false,
+                    singleSelect:true,
+                    striped:true,
+                    fitColumns:true,
+                    scrollbarSize:0,
+                    frozenColumns:[[
+                    ]],
+                    columns:[[
+                        {field:'ccode',width:100,fixed:true,align:'center',title:'股票代码',sortable:true},
+                        {field:'cname',width:100,fixed:true,align:'center',title:'股票名称',fixed:true,sortable:true},
+                        {field:'fname',width:100,fixed:true,align:'center',title:'资金账户',sortable:true},
+                        {field:'dtime',width:150,fixed:true,align:'center',title:'成交时间',sortable:true,formatter:function(val,row,index){
+                            return row.ddate + " " + row.dtime;
+                        }},
+                        {field:'side',width:100,fixed:true,align:'center',title:'委托方向',sortable:true,
+                            styler: function(value,row,index){
+                                if (value =='买入'){
+                                    return 'color:#FF4C4C;';
+                                }else{
+                                    return 'color:#29A63D;';
+                                }
+                            }
+                        },
+                        {field:'dprice',width:120,fixed:true,align:'center',title:'成交价格',sortable:true},
+                        {field:'dcount',width:120,fixed:true,align:'center',title:'成交数量',sortable:true},
+                        {field:'amount',width:120,fixed:true,halign:'center',align:'right',title:'成交金额',sortable:true,formatter:API.METHODS.numberFormatter},
+                        // {field:'dcode',align:'center',title:'成交编号',sortable:true},
+                        {field:'ocode',width:200,fixed:true,align:'center',title:'委托编号',sortable:true}
+                    ]],
+                };
+                API.METHODS.loadData('#transaction_record_table',optionData);
+            },
+            search(){
+                this.getQueryParam();
+                $('#transaction_record_table').datagrid('gotoPage', 1);
+            },
+            getQueryParam:function(){
+                var queryParams = {}
+                try{
+                    queryParams = $('#transaction_record_table').datagrid('options').queryParams;
+                }catch(e){
+                    console.log(e);
+                }finally{
+                }
+                queryParams.faccount_id = $('#transaction_record .accountSelect').combobox('getValues').join(',');
+
+                var side = $('#transaction_record .directionSelect').combobox('getValue');
+                if(side =='all'){
+                    delete queryParams.side;
+                }else{
+                    queryParams.side = side;
+                }
+
+                $('#transaction_record .startTime').datebox('getValue')?queryParams.sdate = $('#transaction_record .startTime').datebox('getValue').split(' ')[0]:delete queryParams.sdate;
+                $('#transaction_record .endTime').datebox('getValue')?queryParams.edate = $('#transaction_record .endTime').datebox('getValue').split(' ')[0]:delete queryParams.edate;
+                queryParams.ccode = $('#transaction_record .transaction_record_keyword').val();
+                return queryParams;
+            },
+            getDataByUrl:function(url,option,callBack){
+                API.METHODS.getData(url,option,function(res){
+                    if(res.status==0){
+                        callBack && callBack(res);
+                    }
+                },'get')
+            },
+            getAccountListOption:function(){
+                var url = '/api/faccount/list';
+                var that = this;
+                this.getDataByUrl(url,{},function(res){
+                    console.log(res);
+                    var data = [{ id: "", name: "全部" }].concat(
+                        res.data.map(e => {
+                    return {
+                        id: e.faccount_id,
+                        name: e.fname
+                    };
+                    })
+                );
+                EUtils.initSelect('#transaction_record .accountSelect',data,{multiple:false,editable:true});
+                });
+            },
+            getTraderListOption:function(){
+                var url = '/api/public/option/trader/list';
+                var that = this;
+                this.getDataByUrl(url,{},function(vm,res){
+                    var data = res.data.list;
+                    data.unshift({'id':'',name:'全部'});
+                    EUtils.initSelect('#transaction_record .traderSelect',data,{multiple:false,editable:true});
+                });
+            },
+            getTeamListOption:function(){
+                var url = '/api/public/option/team/list';
+                this.getDataByUrl(url,{},function(vm,res){
+                    var data = res.data.list;
+                    data.unshift({'id':'',name:'全部'});
+                    EUtils.initSelect('#transaction_record .teamSelect',data,{multiple:false,editable:true});
+                });
+            },
+            getDirection:function(){
+                var data = [
+                    {'id':'all', 'name':'全部'},
+                    {'id':0, 'name':'买入'},{
+                    'id':1, 'name':'卖出'}];
+                    EUtils.initSelect('#transaction_record .directionSelect',data,{multiple:false,editable:false});
+            },
+            getStatus:function(){
+                var url = '/api/public/option/order/status';
+                var that = this;
+                this.getDataByUrl(url,{},function(vm,res){
+                    var data = res.data;
+                    var result = [];
+                    for(key in data){
+                        result.push({id:key,name:data[key]})
+                    }
+                    result.unshift({'id':'',name:'全部'});
+                    that.initSelect('#transaction_record .statusSelect',result,{multiple:true});
+                });
+            },
+
+            getTimeType:function(){
+                this.initSelect('#transaction_record .timeTypeSelect',[{'id':'otime','name':'委托时间'},{'id':'dtime','name':'成交时间'}])
+            },
+            getExcel(){
+                //防止猛点
+                var params = this.getQueryParam();
+                var baseUrl = "/api/export/fill";
+                EUtils.downloadExcel(baseUrl,params   );
+            }
+    };
+
+
+    controller.init(view,model);
+}();
+</script>
+</body>
+</html>

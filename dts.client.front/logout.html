@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <title>管理平台</title>
+	<script type="text/javascript" src="/resources/easyui/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/resources/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="/resources/js/util.js"></script>
+    <script>
+        $.ajax({url:"/api/public/logout",async:false, complete: function(){
+            API.METHODS.removeUserInfo();
+            // location.href='/login.html';
+        }});
+    </script>
+</head>
+
+<body>
+退出中… …
+
+</body>
+</html>

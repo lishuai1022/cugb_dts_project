@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <title>日内交易管理系统</title>
+    <link rel="shortcut icon" href="logo.ico" type="image/x-icon" />
+	<link rel="stylesheet" type="text/css" href="/resources/easyui/themes/bootstrap/easyui.css">
+	<link rel="stylesheet" type="text/css" href="/resources/easyui/themes/icon.css">
+	<script type="text/javascript" src="/resources/js/jr.js"></script>
+	<script type="text/javascript" src="/resources/js/json2.js"></script>
+	<script type="text/javascript" src="/resources/easyui/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/resources/easyui/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/resources/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="/resources/js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="/resources/js/validate.js"></script>
+    <script type="text/javascript" src="/resources/js/util.js"></script>
+	<script src="/resources/js/validate.js"></script>
+    <style>
+        .easyui-fluid{
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .systemTitle{
+            text-align:center;color:#fff;
+            padding:90px 0 10px;
+
+        }
+    </style>
+    <script>
+        !function(){
+            var isLogin = API.METHODS.checkLogin();
+            if(isLogin){
+                window.location.href='/';
+            }
+        }();
+    </script>
+</head>
+
+<body style="background-image: url(/resources/images/bag.jpg)">
+<form id="__login_form" method="post">
+    <h1 class="systemTitle">日内交易管理系统</h1>
+	<div class="easyui-panel" title="系统登录" style="width:100%;max-width:400px;padding:30px 60px;margin: 0 auto">
+		<div style="margin-bottom:10px">
+			<input class="easyui-textbox login_username" name="login_username" style="width:100%;height:40px;padding:12px" data-options="prompt:'请输入登录账号',iconCls:'icon-man',iconWidth:38,required:true,validType:'length[4,20]'">
+		</div>
+		<div style="margin-bottom:10px">
+			<input class="easyui-textbox easyui-passwordbox login_password" name="login_password" style="width:100%;height:40px;padding:12px" data-options="prompt:'请输入密码',iconCls:'icon-lock',iconWidth:38,required:true,validType:'length[6,20]'">
+		</div>
+		<div style="margin-bottom:20px;">
+			<input class="easyui-textbox code" name="code" style="width:60%;height:40px;padding:12px"  data-options="prompt:'验证码',required:true,tipPosition:'left',validType:'limitLength[4]'">
+			<img id="login_image_code" style="vertical-align: bottom;margin-left: 10px" src="/api/public/img/code?type=1" width="90px" height="40px" onclick="getCode()" >
+		</div>
+		<div>
+            <button type="submit" class="easyui-linkbutton" style="padding:5px 0px;width:100%;font-size:14px;">登录</button>
+		</div>
+	</div>
+</form>
+<script type="text/javascript">
+    $('#__login_form').form({
+		url:'/api/public/login',
+		onSubmit:function(){
+		    if($(this).form('validate')){
+                $.messager.progress();
+			}
+			return $(this).form('validate');
+		},
+		success:function(res){
+            $.messager.progress('close');
+		    var jo = $.parseJSON(res);
+			if(jo.status =='0'){
+                STORAGE.setItem('user',jo.data.user);
+                STORAGE.setItem('code',jo.data.code);
+				location.href="/";
+			}else{
+			    getCode();
+			    $("#__login_form .code").textbox('clear')
+				$.messager.alert('登录失败',jo['msg'],'error');
+			}
+		}
+	});
+    function getCode() {
+        $('#login_image_code').attr({src:'/api/public/img/code?type=1&time='+new Date().getTime()});
+    }
+
+</script>
+</body>
+</html>
